@@ -1,0 +1,20 @@
+{
+ parserClass ="com.blamejared.zencodeplugin.parser.ZenCodeParser"
+
+ extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+ psiClassPrefix="ZenCode"
+ psiImplClassSuffix="Impl"
+ psiPackage="com.blamejared.zencodeplugin.psi"
+ psiImplPackage="com.blamejared.zencodeplugin.psi.impl"
+
+ elementTypeHolderClass="com.blamejared.zencodeplugin.psi.ZenCodeTypes"
+ elementTypeClass="com.blamejared.zencodeplugin.psi.ZenCodeElementType"
+ tokenTypeClass="com.blamejared.zencodeplugin.psi.ZenCodeTokenType"
+}
+
+zenCodeFile ::= item_*;
+private item_ ::= (property|COMMENT|CLRF);
+
+
+property ::= (KEY? SEPARATOR VALUE?) | KEY

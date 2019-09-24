@@ -1,0 +1,26 @@
+<idea-plugin>
+    <id>com.blamejared.ZenCodeIntelliJPlugin</id>
+    <name>ZenCode</name>
+    <vendor url="https://github.com/CraftTweaker">CraftTweaker</vendor>
+    <version/>
+
+    <description>
+        This plugin allows IntelliJ IDEA integration to ZenCode.
+    </description>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <fileTypeFactory implementation="com.blamejared.zencodeplugin.language.ZenCodeFileTypeFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+
+    </actions>
+</idea-plugin>
