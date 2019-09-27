@@ -17,7 +17,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.blamejared.zencodeplugin.language.ZenCodeFileTypeFactory"/>
-        <lang.parserDefinition language="ZenCode" implementationClass="com.blamejared.zencodeplugin.flex.ZenCodeFlexParserDefinition"/>
+        <lang.parserDefinition language="ZenCode"
+                               implementationClass="com.blamejared.zencodeplugin.flex.ZenCodeFlexParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="ZenCode"
+                                       implementationClass="com.blamejared.zencodeplugin.highlighter.ZenCodeSyntaxHighligherFactory"/>
     </extensions>
 
     <actions>

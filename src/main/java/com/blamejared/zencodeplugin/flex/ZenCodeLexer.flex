@@ -23,10 +23,11 @@ import static com.blamejared.zencodeplugin.psi.ZenCodeTypes.*;
 %unicode
 
 EOL=\R
+WHITE_SPACE=\s+
 
 T_COMMENT_SCRIPT=#[^\n]*[\n\\e]
 T_COMMENT_SINGLELINE="//"[^\n]*
-T_COMMENT_MULTILINE="/"\\*([^\\*]|(\\*+([^\\*/])))*\\*+"/"
+T_COMMENT_MULTILINE="/"\*([^\\*]|(\\*+([^\\*/])))*\*+"/"
 T_IDENTIFIER=@?[a-zA-Z_][a-zA-Z_0-9]*
 T_LOCAL_IDENTIFIER=\$[a-zA-Z_][a-zA-Z_0-9]*
 T_FLOAT=-?(0|[1-9][0-9]*)\.[0-9]+([eE][+\-]?[0-9]+)?[a-zA-Z_]*
@@ -36,15 +37,15 @@ T_STRING_DQ=\"([^\"\\\n]|\\(\['\\\"\\\/bfnrt&]|u[0-9a-fA-F]{4}))*\"
 T_STRING_DQ_WYSIWYG=\"[^\"]\"
 T_STRING_SQ='([^'\\\n]|\\(['\"\\/bfnrt&]|u[0-9a-fA-F]{4}))*'
 T_STRING_SQ_WYSIWYG=@'[^']'
-T_WHITESPACE_TAB=\t
-T_WHITESPACE_CARRIAGE_RETURN=\r
 
 %%
 <YYINITIAL> {
-  " "                             { return T_WHITESPACE_SPACE; }
-  {T_WHITESPACE_TAB}              { return T_WHITESPACE_TAB; }
-  {T_WHITESPACE_CARRIAGE_RETURN}  { return T_WHITESPACE_CARRIAGE_RETURN; }
+  {WHITE_SPACE}               { return WHITE_SPACE; }
 
+  " "                         { return T_WHITESPACE_SPACE; }
+  "\\t"                       { return T_WHITESPACE_TAB; }
+  "\\n"                       { return T_WHITESPACE_NEWLINE; }
+  "\\r"                       { return T_WHITESPACE_CARRIAGE_RETURN; }
   "{"                         { return T_AOPEN; }
   "}"                         { return T_ACLOSE; }
   "["                         { return T_SQOPEN; }
@@ -86,7 +87,7 @@ T_WHITESPACE_CARRIAGE_RETURN=\r
   "<<="                       { return T_SHLASSIGN; }
   "<<"                        { return T_SHL; }
   "<"                         { return T_LESS; }
-  "="                         { return T_GREATEREQ; }
+  ">="                        { return T_GREATEREQ; }
   ">>>"                       { return T_USHR; }
   ">>>="                      { return T_USHRASSIGN; }
   ">>="                       { return T_SHRASSIGN; }
@@ -173,7 +174,6 @@ T_WHITESPACE_CARRIAGE_RETURN=\r
   "false"                     { return K_FALSE; }
   "new"                       { return K_NEW; }
   "K_EXPANSION"               { return K_EXPANSION; }
-  "K_AOPEN"                   { return K_AOPEN; }
 
   {T_COMMENT_SCRIPT}          { return T_COMMENT_SCRIPT; }
   {T_COMMENT_SINGLELINE}      { return T_COMMENT_SINGLELINE; }

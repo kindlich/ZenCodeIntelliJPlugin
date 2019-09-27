@@ -4,7 +4,7 @@ package com.blamejared.zencodeplugin.parser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static com.blamejared.zencodeplugin.psi.ZenCodeTypes.*;
-import static com.intellij.lang.parser.GeneratedParserUtilBase.*;
+import static com.blamejared.zencodeplugin.parser.ZenCodeParserUtil.*;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
@@ -34,7 +34,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   protected boolean parse_root_(IElementType t, PsiBuilder b, int l) {
-    return zenCodeFile(b, l + 1);
+    return ZenCodeFile(b, l + 1);
   }
 
   /* ********************************************************** */
@@ -413,8 +413,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionAssign
-  static boolean Expression(PsiBuilder b, int l) {
-    return ExpressionAssign(b, l + 1);
+  public static boolean Expression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Expression")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _COLLAPSE_, EXPRESSION, "<expression>");
+    r = ExpressionAssign(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
   }
 
   /* ********************************************************** */
@@ -633,7 +638,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_LESS T_IDENTIFIER [(T_COLON ValidBEPContent)*] T_GREATER
-  static boolean ExpressionBEP(PsiBuilder b, int l) {
+  public static boolean ExpressionBEP(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionBEP")) return false;
     if (!nextTokenIs(b, T_LESS)) return false;
     boolean r;
@@ -641,7 +646,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeTokens(b, 0, T_LESS, T_IDENTIFIER);
     r = r && ExpressionBEP_2(b, l + 1);
     r = r && consumeToken(b, T_GREATER);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_BEP, r);
     return r;
   }
 
@@ -770,15 +775,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_INT | T_PREFIXED_INT | T_FLOAT | T_STRING_SQ | T_STRING_DQ | T_IDENTIFIER | T_LOCAL_IDENTIFIER | K_TRUE | K_FALSE | K_NULL
+  // T_INT | T_PREFIXED_INT | T_FLOAT | ZCStringLiteral | T_IDENTIFIER | T_LOCAL_IDENTIFIER | K_TRUE | K_FALSE | K_NULL
   static boolean ExpressionLiteral(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionLiteral")) return false;
     boolean r;
     r = consumeToken(b, T_INT);
     if (!r) r = consumeToken(b, T_PREFIXED_INT);
     if (!r) r = consumeToken(b, T_FLOAT);
-    if (!r) r = consumeToken(b, T_STRING_SQ);
-    if (!r) r = consumeToken(b, T_STRING_DQ);
+    if (!r) r = ZCStringLiteral(b, l + 1);
     if (!r) r = consumeToken(b, T_IDENTIFIER);
     if (!r) r = consumeToken(b, T_LOCAL_IDENTIFIER);
     if (!r) r = consumeToken(b, K_TRUE);
@@ -912,7 +916,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ExpressionUnary [(MulOperator)*]
+  // ExpressionUnary [(MulOperator ExpressionUnary)*]
   static boolean ExpressionMul(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMul")) return false;
     boolean r;
@@ -923,14 +927,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // [(MulOperator)*]
+  // [(MulOperator ExpressionUnary)*]
   private static boolean ExpressionMul_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMul_1")) return false;
     ExpressionMul_1_0(b, l + 1);
     return true;
   }
 
-  // (MulOperator)*
+  // (MulOperator ExpressionUnary)*
   private static boolean ExpressionMul_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMul_1_0")) return false;
     while (true) {
@@ -941,12 +945,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (MulOperator)
+  // MulOperator ExpressionUnary
   private static boolean ExpressionMul_1_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMul_1_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = MulOperator(b, l + 1);
+    r = r && ExpressionUnary(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1092,7 +1097,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionPrimary [(
-  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ)//Member get
+  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral)//Member get
   //                                      | (T_DOT2 ExpressionAssign)  //Range
   //                                      | (T_SQOPEN ExpressionAssign [(T_COMMA) ExpressionAssign] T_SQCLOSE) //Index get
   //                                      | CallArguments //Call
@@ -1111,7 +1116,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   // [(
-  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ)//Member get
+  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral)//Member get
   //                                      | (T_DOT2 ExpressionAssign)  //Range
   //                                      | (T_SQOPEN ExpressionAssign [(T_COMMA) ExpressionAssign] T_SQCLOSE) //Index get
   //                                      | CallArguments //Call
@@ -1126,7 +1131,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   // (
-  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ)//Member get
+  //                                     (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral)//Member get
   //                                      | (T_DOT2 ExpressionAssign)  //Range
   //                                      | (T_SQOPEN ExpressionAssign [(T_COMMA) ExpressionAssign] T_SQCLOSE) //Index get
   //                                      | CallArguments //Call
@@ -1144,7 +1149,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ)//Member get
+  // (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral)//Member get
   //                                      | (T_DOT2 ExpressionAssign)  //Range
   //                                      | (T_SQOPEN ExpressionAssign [(T_COMMA) ExpressionAssign] T_SQCLOSE) //Index get
   //                                      | CallArguments //Call
@@ -1167,15 +1172,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ
+  // T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral
   private static boolean ExpressionPostFix_1_0_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionPostFix_1_0_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = ExpressionPostFix_1_0_0_0_0(b, l + 1);
     if (!r) r = consumeToken(b, T_DOLLAR);
-    if (!r) r = consumeToken(b, T_STRING_SQ);
-    if (!r) r = consumeToken(b, T_STRING_DQ);
+    if (!r) r = ZCStringLiteral(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -1705,7 +1709,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_IMPORT T_DOT? Type [K_AS Type] T_SEMICOLON
-  static boolean Import(PsiBuilder b, int l) {
+  public static boolean Import(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Import")) return false;
     if (!nextTokenIs(b, K_IMPORT)) return false;
     boolean r;
@@ -1715,7 +1719,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && Type(b, l + 1);
     r = r && Import_3(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, IMPORT, r);
     return r;
   }
 
@@ -1969,16 +1973,16 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // K_AOPEN [Statement*] T_ACLOSE
-  static boolean StatementBlock(PsiBuilder b, int l) {
+  // T_AOPEN [Statement*] T_ACLOSE
+  public static boolean StatementBlock(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementBlock")) return false;
-    if (!nextTokenIs(b, K_AOPEN)) return false;
+    if (!nextTokenIs(b, T_AOPEN)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, K_AOPEN);
+    r = consumeToken(b, T_AOPEN);
     r = r && StatementBlock_1(b, l + 1);
     r = r && consumeToken(b, T_ACLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_BLOCK, r);
     return r;
   }
 
@@ -2002,7 +2006,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_BREAK [T_IDENTIFIER] T_SEMICOLON
-  static boolean StatementBreak(PsiBuilder b, int l) {
+  public static boolean StatementBreak(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementBreak")) return false;
     if (!nextTokenIs(b, K_BREAK)) return false;
     boolean r;
@@ -2010,7 +2014,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, K_BREAK);
     r = r && StatementBreak_1(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_BREAK, r);
     return r;
   }
 
@@ -2023,7 +2027,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_CONTINUE [T_IDENTIFIER] T_SEMICOLON
-  static boolean StatementContinue(PsiBuilder b, int l) {
+  public static boolean StatementContinue(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementContinue")) return false;
     if (!nextTokenIs(b, K_CONTINUE)) return false;
     boolean r;
@@ -2031,7 +2035,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, K_CONTINUE);
     r = r && StatementContinue_1(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_CONTINUE, r);
     return r;
   }
 
@@ -2044,7 +2048,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_DO Statement K_WHILE T_BROPEN Expression T_BRCLOSE T_SEMICOLON
-  static boolean StatementDoWhile(PsiBuilder b, int l) {
+  public static boolean StatementDoWhile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementDoWhile")) return false;
     if (!nextTokenIs(b, K_DO)) return false;
     boolean r;
@@ -2054,58 +2058,59 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && consumeTokens(b, 0, K_WHILE, T_BROPEN);
     r = r && Expression(b, l + 1);
     r = r && consumeTokens(b, 0, T_BRCLOSE, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_DO_WHILE, r);
     return r;
   }
 
   /* ********************************************************** */
   // Expression T_SEMICOLON
-  static boolean StatementExpression(PsiBuilder b, int l) {
+  public static boolean StatementExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementExpression")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, STATEMENT_EXPRESSION, "<statement expression>");
     r = Expression(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // K_FOR T_BROPEN T_IDENTIFIER ((T_COMMA T_IDENTIFIER)*)? T_BRCLOSE Statement
-  static boolean StatementForEach(PsiBuilder b, int l) {
+  // K_FOR T_IDENTIFIER ((T_COMMA T_IDENTIFIER)*)? K_IN Expression Statement
+  public static boolean StatementForEach(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementForEach")) return false;
     if (!nextTokenIs(b, K_FOR)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, K_FOR, T_BROPEN, T_IDENTIFIER);
-    r = r && StatementForEach_3(b, l + 1);
-    r = r && consumeToken(b, T_BRCLOSE);
+    r = consumeTokens(b, 0, K_FOR, T_IDENTIFIER);
+    r = r && StatementForEach_2(b, l + 1);
+    r = r && consumeToken(b, K_IN);
+    r = r && Expression(b, l + 1);
     r = r && Statement(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_FOR_EACH, r);
     return r;
   }
 
   // ((T_COMMA T_IDENTIFIER)*)?
-  private static boolean StatementForEach_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "StatementForEach_3")) return false;
-    StatementForEach_3_0(b, l + 1);
+  private static boolean StatementForEach_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StatementForEach_2")) return false;
+    StatementForEach_2_0(b, l + 1);
     return true;
   }
 
   // (T_COMMA T_IDENTIFIER)*
-  private static boolean StatementForEach_3_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "StatementForEach_3_0")) return false;
+  private static boolean StatementForEach_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StatementForEach_2_0")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!StatementForEach_3_0_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "StatementForEach_3_0", c)) break;
+      if (!StatementForEach_2_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "StatementForEach_2_0", c)) break;
     }
     return true;
   }
 
   // T_COMMA T_IDENTIFIER
-  private static boolean StatementForEach_3_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "StatementForEach_3_0_0")) return false;
+  private static boolean StatementForEach_2_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StatementForEach_2_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeTokens(b, 0, T_COMMA, T_IDENTIFIER);
@@ -2115,7 +2120,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_IF T_BROPEN Expression T_BRCLOSE Statement [K_ELSE Statement]
-  static boolean StatementIf(PsiBuilder b, int l) {
+  public static boolean StatementIf(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementIf")) return false;
     if (!nextTokenIs(b, K_IF)) return false;
     boolean r;
@@ -2125,7 +2130,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, T_BRCLOSE);
     r = r && Statement(b, l + 1);
     r = r && StatementIf_5(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_IF, r);
     return r;
   }
 
@@ -2149,7 +2154,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_LOCK T_BROPEN Expression T_BRCLOSE Statement
-  static boolean StatementLock(PsiBuilder b, int l) {
+  public static boolean StatementLock(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementLock")) return false;
     if (!nextTokenIs(b, K_LOCK)) return false;
     boolean r;
@@ -2158,13 +2163,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && Expression(b, l + 1);
     r = r && consumeToken(b, T_BRCLOSE);
     r = r && Statement(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_LOCK, r);
     return r;
   }
 
   /* ********************************************************** */
   // K_RETURN Expression T_SEMICOLON
-  static boolean StatementReturn(PsiBuilder b, int l) {
+  public static boolean StatementReturn(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementReturn")) return false;
     if (!nextTokenIs(b, K_RETURN)) return false;
     boolean r;
@@ -2172,13 +2177,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, K_RETURN);
     r = r && Expression(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_RETURN, r);
     return r;
   }
 
   /* ********************************************************** */
   // K_SWITCH T_BROPEN Expression T_BRCLOSE T_AOPEN [(K_CASE (T_IDENTIFIER|K_DEFAULT) T_COLON Statement*)*] T_ACLOSE
-  static boolean StatementSwitch(PsiBuilder b, int l) {
+  public static boolean StatementSwitch(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementSwitch")) return false;
     if (!nextTokenIs(b, K_SWITCH)) return false;
     boolean r;
@@ -2188,7 +2193,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && consumeTokens(b, 0, T_BRCLOSE, T_AOPEN);
     r = r && StatementSwitch_5(b, l + 1);
     r = r && consumeToken(b, T_ACLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_SWITCH, r);
     return r;
   }
 
@@ -2245,7 +2250,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_TRY Statement (K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE)* [K_FINALLY Statement]
-  static boolean StatementTryCatch(PsiBuilder b, int l) {
+  public static boolean StatementTryCatch(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementTryCatch")) return false;
     if (!nextTokenIs(b, K_TRY)) return false;
     boolean r;
@@ -2254,7 +2259,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && Statement(b, l + 1);
     r = r && StatementTryCatch_2(b, l + 1);
     r = r && StatementTryCatch_3(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_TRY_CATCH, r);
     return r;
   }
 
@@ -2303,17 +2308,17 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // (K_VAR|K_VAL) T_IDENTIFIER (K_AS Type)? [T_ASSIGN Expression] T_SEMICOLON
-  static boolean StatementVar(PsiBuilder b, int l) {
+  public static boolean StatementVar(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementVar")) return false;
-    if (!nextTokenIs(b, "", K_VAL, K_VAR)) return false;
+    if (!nextTokenIs(b, "<statement var>", K_VAL, K_VAR)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, STATEMENT_VAR, "<statement var>");
     r = StatementVar_0(b, l + 1);
     r = r && consumeToken(b, T_IDENTIFIER);
     r = r && StatementVar_2(b, l + 1);
     r = r && StatementVar_3(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -2364,7 +2369,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_WHILE T_BROPEN Expression T_BRCLOSE Statement
-  static boolean StatementWhileDo(PsiBuilder b, int l) {
+  public static boolean StatementWhileDo(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementWhileDo")) return false;
     if (!nextTokenIs(b, K_WHILE)) return false;
     boolean r;
@@ -2373,7 +2378,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && Expression(b, l + 1);
     r = r && consumeToken(b, T_BRCLOSE);
     r = r && Statement(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, STATEMENT_WHILE_DO, r);
     return r;
   }
 
@@ -2458,14 +2463,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // (PrimitiveType | ObjectType) [(TypeSuffix)*] [T_QUEST]
-  static boolean Type(PsiBuilder b, int l) {
+  public static boolean Type(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Type")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _COLLAPSE_, TYPE, "<type>");
     r = Type_0(b, l + 1);
     r = r && Type_1(b, l + 1);
     r = r && Type_2(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -2653,10 +2658,9 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (T_DOT2 Type) | ((T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag)
+  // (T_DOT2 Type) | ([T_QUEST](T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag)
   static boolean TypeSuffix(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypeSuffix")) return false;
-    if (!nextTokenIs(b, "", T_DOT2, T_SQOPEN)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = TypeSuffix_0(b, l + 1);
@@ -2676,62 +2680,70 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag
+  // [T_QUEST](T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag
   private static boolean TypeSuffix_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypeSuffix_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = TypeSuffix_1_0(b, l + 1);
+    r = r && TypeSuffix_1_1(b, l + 1);
     r = r && StorageTag(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
-  // T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))
+  // [T_QUEST]
   private static boolean TypeSuffix_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypeSuffix_1_0")) return false;
+    consumeToken(b, T_QUEST);
+    return true;
+  }
+
+  // T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))
+  private static boolean TypeSuffix_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, T_SQOPEN);
-    r = r && TypeSuffix_1_0_1(b, l + 1);
-    r = r && TypeSuffix_1_0_2(b, l + 1);
+    r = r && TypeSuffix_1_1_1(b, l + 1);
+    r = r && TypeSuffix_1_1_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // [(T_COMMA)*]
-  private static boolean TypeSuffix_1_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "TypeSuffix_1_0_1")) return false;
-    TypeSuffix_1_0_1_0(b, l + 1);
+  private static boolean TypeSuffix_1_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1_1")) return false;
+    TypeSuffix_1_1_1_0(b, l + 1);
     return true;
   }
 
   // (T_COMMA)*
-  private static boolean TypeSuffix_1_0_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "TypeSuffix_1_0_1_0")) return false;
+  private static boolean TypeSuffix_1_1_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1_1_0")) return false;
     while (true) {
       int c = current_position_(b);
       if (!consumeToken(b, T_COMMA)) break;
-      if (!empty_element_parsed_guard_(b, "TypeSuffix_1_0_1_0", c)) break;
+      if (!empty_element_parsed_guard_(b, "TypeSuffix_1_1_1_0", c)) break;
     }
     return true;
   }
 
   // T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE)
-  private static boolean TypeSuffix_1_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "TypeSuffix_1_0_2")) return false;
+  private static boolean TypeSuffix_1_1_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, T_SQCLOSE);
-    if (!r) r = TypeSuffix_1_0_2_1(b, l + 1);
-    if (!r) r = TypeSuffix_1_0_2_2(b, l + 1);
+    if (!r) r = TypeSuffix_1_1_2_1(b, l + 1);
+    if (!r) r = TypeSuffix_1_1_2_2(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // T_LESS TypeParameters T_GREATER T_SQCLOSE
-  private static boolean TypeSuffix_1_0_2_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "TypeSuffix_1_0_2_1")) return false;
+  private static boolean TypeSuffix_1_1_2_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1_2_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, T_LESS);
@@ -2742,8 +2754,8 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   // Type T_SQCLOSE
-  private static boolean TypeSuffix_1_0_2_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "TypeSuffix_1_0_2_2")) return false;
+  private static boolean TypeSuffix_1_1_2_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "TypeSuffix_1_1_2_2")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = Type(b, l + 1);
@@ -2809,56 +2821,69 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // T_STRING_DQ | T_STRING_SQ
+  public static boolean ZCStringLiteral(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZCStringLiteral")) return false;
+    if (!nextTokenIs(b, "<zc string literal>", T_STRING_DQ, T_STRING_SQ)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, ZC_STRING_LITERAL, "<zc string literal>");
+    r = consumeToken(b, T_STRING_DQ);
+    if (!r) r = consumeToken(b, T_STRING_SQ);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // (Import*)? [(Definition|Statement)*]
-  static boolean zenCodeFile(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile")) return false;
+  static boolean ZenCodeFile(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = zenCodeFile_0(b, l + 1);
-    r = r && zenCodeFile_1(b, l + 1);
+    r = ZenCodeFile_0(b, l + 1);
+    r = r && ZenCodeFile_1(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   // (Import*)?
-  private static boolean zenCodeFile_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile_0")) return false;
-    zenCodeFile_0_0(b, l + 1);
+  private static boolean ZenCodeFile_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile_0")) return false;
+    ZenCodeFile_0_0(b, l + 1);
     return true;
   }
 
   // Import*
-  private static boolean zenCodeFile_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile_0_0")) return false;
+  private static boolean ZenCodeFile_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile_0_0")) return false;
     while (true) {
       int c = current_position_(b);
       if (!Import(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "zenCodeFile_0_0", c)) break;
+      if (!empty_element_parsed_guard_(b, "ZenCodeFile_0_0", c)) break;
     }
     return true;
   }
 
   // [(Definition|Statement)*]
-  private static boolean zenCodeFile_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile_1")) return false;
-    zenCodeFile_1_0(b, l + 1);
+  private static boolean ZenCodeFile_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile_1")) return false;
+    ZenCodeFile_1_0(b, l + 1);
     return true;
   }
 
   // (Definition|Statement)*
-  private static boolean zenCodeFile_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile_1_0")) return false;
+  private static boolean ZenCodeFile_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile_1_0")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!zenCodeFile_1_0_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "zenCodeFile_1_0", c)) break;
+      if (!ZenCodeFile_1_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "ZenCodeFile_1_0", c)) break;
     }
     return true;
   }
 
   // Definition|Statement
-  private static boolean zenCodeFile_1_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "zenCodeFile_1_0_0")) return false;
+  private static boolean ZenCodeFile_1_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ZenCodeFile_1_0_0")) return false;
     boolean r;
     r = Definition(b, l + 1);
     if (!r) r = Statement(b, l + 1);

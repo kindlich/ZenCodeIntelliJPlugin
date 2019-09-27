@@ -1,6 +1,6 @@
 {
- parserClass ="com.blamejared.zencodeplugin.parser.ZenCodeParser"
-  parserUtilClass="com.blamejared.zencodeplugin.parserutil.ZenCodeParserUtil"
+  parserClass ="com.blamejared.zencodeplugin.parser.ZenCodeParser"
+  parserUtilClass="com.blamejared.zencodeplugin.parser.ZenCodeParserUtil"
 
  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
@@ -9,14 +9,16 @@
  psiPackage="com.blamejared.zencodeplugin.psi"
  psiImplPackage="com.blamejared.zencodeplugin.psi.impl"
 
+//Generated
  elementTypeHolderClass="com.blamejared.zencodeplugin.psi.ZenCodeTypes"
+
  elementTypeClass="com.blamejared.zencodeplugin.psi.ZenCodeElementType"
  tokenTypeClass="com.blamejared.zencodeplugin.psi.ZenCodeTokenType"
 
   tokens=[
   T_COMMENT_SCRIPT='regexp:#[^\n]*[\n\\e]'
   T_COMMENT_SINGLELINE='regexp://[^\n]*'
-  T_COMMENT_MULTILINE='regexp:/\\*([^\\*]|(\\*+([^\\*/])))*\\*+/'
+  T_COMMENT_MULTILINE='regexp:/\*([^\\*]|(\\*+([^\\*/])))*\*+/'
 
   T_WHITESPACE_SPACE=' '
   T_WHITESPACE_TAB='\t'
@@ -73,7 +75,7 @@
   T_SHLASSIGN='<<='
   T_SHL='<<'
   T_LESS='<'
-  T_GREATEREQ='='
+  T_GREATEREQ='>='
   T_USHR='>>>'
   T_USHRASSIGN='>>>='
   T_SHRASSIGN='>>='
@@ -162,11 +164,13 @@
   ]
 }
 
-/*
-zenCodeFile ::= (Import*)? [(Definition|Statement)*]
-private Import ::= K_IMPORT T_DOT? Type [K_AS Type] T_SEMICOLON
-private Type ::= (PrimitiveType | ObjectType) [(TypeSuffix)*] [T_QUEST]
-private TypeSuffix ::= (T_DOT2 Type) | ((T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag)
+
+ZenCodeFile ::= (Import*)? [(Definition|Statement)*]
+Import ::= K_IMPORT T_DOT? Type [K_AS Type] T_SEMICOLON
+Type ::= (PrimitiveType | ObjectType) [(TypeSuffix)*] [T_QUEST]
+ZCStringLiteral ::= T_STRING_DQ | T_STRING_SQ
+
+private TypeSuffix ::= (T_DOT2 Type) | ([T_QUEST](T_SQOPEN [(T_COMMA)*] (T_SQCLOSE | (T_LESS TypeParameters T_GREATER T_SQCLOSE) | (Type T_SQCLOSE))) StorageTag)
 private PrimitiveType ::= K_VOID | K_BOOL | K_BYTE | K_SBYTE | K_SHORT | K_USHORT | K_INT | K_UINT | K_LONG | K_ULONG | K_USIZE | K_FLOAT | K_DOUBLE | K_CHAR
 private ObjectType ::= (K_STRING | QualifiedType | FunctionType) [StorageTag]
 private QualifiedType ::= (T_IDENTIFIER [(T_DOT T_IDENTIFIER)*])
@@ -200,22 +204,22 @@ private FunctionDefinition ::= K_FUNCTION T_IDENTIFIER T_BROPEN T_BRCLOSE ((T_AO
 
 //for_i loop
 private Statement ::= StatementBlock | StatementBreak | StatementContinue |  StatementExpression | StatementIf | StatementLock | StatementReturn | StatementSwitch | StatementTryCatch | StatementVar | StatementWhileDo | StatementDoWhile | StatementForEach
-private StatementExpression ::= Expression T_SEMICOLON
-private StatementBlock ::= K_AOPEN [Statement*] T_ACLOSE
-private StatementBreak ::= K_BREAK [T_IDENTIFIER] T_SEMICOLON
-private StatementContinue ::= K_CONTINUE [T_IDENTIFIER] T_SEMICOLON
-private StatementIf ::= K_IF T_BROPEN Expression T_BRCLOSE Statement [K_ELSE Statement]
-private StatementLock ::= K_LOCK T_BROPEN Expression T_BRCLOSE Statement
-private StatementReturn ::= K_RETURN Expression T_SEMICOLON
-private StatementSwitch ::= K_SWITCH T_BROPEN Expression T_BRCLOSE T_AOPEN [(K_CASE (T_IDENTIFIER|K_DEFAULT) T_COLON Statement*)*] T_ACLOSE
-private StatementTryCatch ::= K_TRY Statement (K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE)* [K_FINALLY Statement]
-private StatementVar ::= (K_VAR|K_VAL) T_IDENTIFIER (K_AS Type)? [T_ASSIGN Expression] T_SEMICOLON
-private StatementWhileDo ::= K_WHILE T_BROPEN Expression T_BRCLOSE Statement
-private StatementDoWhile ::= K_DO Statement K_WHILE T_BROPEN Expression T_BRCLOSE T_SEMICOLON
-private StatementForEach ::= K_FOR T_BROPEN T_IDENTIFIER ((T_COMMA T_IDENTIFIER)*)? T_BRCLOSE Statement
+StatementExpression ::= Expression T_SEMICOLON
+StatementBlock ::= T_AOPEN [Statement*] T_ACLOSE
+StatementBreak ::= K_BREAK [T_IDENTIFIER] T_SEMICOLON
+StatementContinue ::= K_CONTINUE [T_IDENTIFIER] T_SEMICOLON
+StatementIf ::= K_IF T_BROPEN Expression T_BRCLOSE Statement [K_ELSE Statement]
+StatementLock ::= K_LOCK T_BROPEN Expression T_BRCLOSE Statement
+StatementReturn ::= K_RETURN Expression T_SEMICOLON
+StatementSwitch ::= K_SWITCH T_BROPEN Expression T_BRCLOSE T_AOPEN [(K_CASE (T_IDENTIFIER|K_DEFAULT) T_COLON Statement*)*] T_ACLOSE
+StatementTryCatch ::= K_TRY Statement (K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE)* [K_FINALLY Statement]
+StatementVar ::= (K_VAR|K_VAL) T_IDENTIFIER (K_AS Type)? [T_ASSIGN Expression] T_SEMICOLON
+StatementWhileDo ::= K_WHILE T_BROPEN Expression T_BRCLOSE Statement
+StatementDoWhile ::= K_DO Statement K_WHILE T_BROPEN Expression T_BRCLOSE T_SEMICOLON
+StatementForEach ::= K_FOR T_IDENTIFIER ((T_COMMA T_IDENTIFIER)*)? K_IN Expression Statement
 
 
-private Expression ::= ExpressionAssign
+Expression ::= ExpressionAssign
 private ExpressionAssign ::= ExpressionConditional [AssignOperator ExpressionAssign]
 private AssignOperator ::= T_ASSIGN | T_ADDASSIGN | T_SUBASSIGN | T_CATASSIGN | T_MULASSIGN | T_DIVASSIGN | T_MODASSIGN | T_ORASSIGN | T_ANDASSIGN | T_XORASSIGN | T_SHLASSIGN | T_SHRASSIGN | T_USHRASSIGN
 private ExpressionConditional ::= ExpressionOrOr [T_QUEST Expression T_COLON Expression]
@@ -230,12 +234,12 @@ private ExpressionShift ::= ExpressionAdd [(ShiftOperator ExpressionAdd)*]
 private ShiftOperator ::= T_SHL | T_SHR | T_USHR
 private ExpressionAdd ::= ExpressionMul [(AddOperator ExpressionMul)*]
 private AddOperator ::= T_ADD | T_SUB | T_CAT
-private ExpressionMul ::= ExpressionUnary [(MulOperator)*]
+private ExpressionMul ::= ExpressionUnary [(MulOperator ExpressionUnary)*]
 private MulOperator ::= T_MUL | T_DIV | T_MOD
 private ExpressionUnary ::= (UnaryOperator ExpressionUnary) | ExpressionPostFix | (K_TRY ((T_QUEST | T_NOT) ExpressionUnary) | ExpressionPostFix)
 private UnaryOperator ::= T_NOT | T_SUB | T_CAT | T_INCREMENT | T_DECREMENT
 private ExpressionPostFix ::= ExpressionPrimary [(
-                                    (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | T_STRING_SQ | T_STRING_DQ)//Member get
+                                    (T_DOT (T_IDENTIFIER TypeArguments) | T_DOLLAR | ZCStringLiteral)//Member get
                                      | (T_DOT2 ExpressionAssign)  //Range
                                      | (T_SQOPEN ExpressionAssign [(T_COMMA) ExpressionAssign] T_SQCLOSE) //Index get
                                      | CallArguments //Call
@@ -261,10 +265,9 @@ private MatchCase ::= (K_DEFAULT | Expression) T_LAMBDA Expression
 
 private ExpressionType ::= Type
 private ExpressionSimple ::= ExpressionLiteral | K_THIS | K_SUPER | T_DOLLAR
-private ExpressionLiteral ::= T_INT | T_PREFIXED_INT | T_FLOAT | T_STRING_SQ | T_STRING_DQ | T_IDENTIFIER | T_LOCAL_IDENTIFIER | K_TRUE | K_FALSE | K_NULL
+private ExpressionLiteral ::= T_INT | T_PREFIXED_INT | T_FLOAT | ZCStringLiteral | T_IDENTIFIER | T_LOCAL_IDENTIFIER | K_TRUE | K_FALSE | K_NULL
 
 
 //TODO BEPs
-private ExpressionBEP ::= T_LESS T_IDENTIFIER [(T_COLON ValidBEPContent)*] T_GREATER
+ExpressionBEP ::= T_LESS T_IDENTIFIER [(T_COLON ValidBEPContent)*] T_GREATER
 private ValidBEPContent ::= T_IDENTIFIER | T_INT
-*/

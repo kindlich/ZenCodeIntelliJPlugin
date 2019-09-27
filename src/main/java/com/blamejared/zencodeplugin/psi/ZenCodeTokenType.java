@@ -4,6 +4,9 @@ import com.blamejared.zencodeplugin.language.ZenCodeLanguage;
 import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Holds the token Types later on
+ */
 public class ZenCodeTokenType extends IElementType {
     
     public ZenCodeTokenType(@NotNull String debugName) {
@@ -12,6 +15,6 @@ public class ZenCodeTokenType extends IElementType {
     
     @Override
     public String toString() {
-        return "ZenCodeTokenType." + super.toString();
+        return super.toString();
     }
 }

@@ -4,13 +4,31 @@ package com.blamejared.zencodeplugin.psi;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.PsiElement;
 import com.intellij.lang.ASTNode;
+import com.blamejared.zencodeplugin.psi.impl.*;
 
 public interface ZenCodeTypes {
 
+  IElementType EXPRESSION = new ZenCodeElementType("EXPRESSION");
+  IElementType EXPRESSION_BEP = new ZenCodeElementType("EXPRESSION_BEP");
+  IElementType IMPORT = new ZenCodeElementType("IMPORT");
+  IElementType STATEMENT_BLOCK = new ZenCodeElementType("STATEMENT_BLOCK");
+  IElementType STATEMENT_BREAK = new ZenCodeElementType("STATEMENT_BREAK");
+  IElementType STATEMENT_CONTINUE = new ZenCodeElementType("STATEMENT_CONTINUE");
+  IElementType STATEMENT_DO_WHILE = new ZenCodeElementType("STATEMENT_DO_WHILE");
+  IElementType STATEMENT_EXPRESSION = new ZenCodeElementType("STATEMENT_EXPRESSION");
+  IElementType STATEMENT_FOR_EACH = new ZenCodeElementType("STATEMENT_FOR_EACH");
+  IElementType STATEMENT_IF = new ZenCodeElementType("STATEMENT_IF");
+  IElementType STATEMENT_LOCK = new ZenCodeElementType("STATEMENT_LOCK");
+  IElementType STATEMENT_RETURN = new ZenCodeElementType("STATEMENT_RETURN");
+  IElementType STATEMENT_SWITCH = new ZenCodeElementType("STATEMENT_SWITCH");
+  IElementType STATEMENT_TRY_CATCH = new ZenCodeElementType("STATEMENT_TRY_CATCH");
+  IElementType STATEMENT_VAR = new ZenCodeElementType("STATEMENT_VAR");
+  IElementType STATEMENT_WHILE_DO = new ZenCodeElementType("STATEMENT_WHILE_DO");
+  IElementType TYPE = new ZenCodeElementType("TYPE");
+  IElementType ZC_STRING_LITERAL = new ZenCodeElementType("ZC_STRING_LITERAL");
 
   IElementType K_ABSTRACT = new ZenCodeTokenType("abstract");
   IElementType K_ALIAS = new ZenCodeTokenType("alias");
-  IElementType K_AOPEN = new ZenCodeTokenType("K_AOPEN");
   IElementType K_AS = new ZenCodeTokenType("as");
   IElementType K_BOOL = new ZenCodeTokenType("bool");
   IElementType K_BREAK = new ZenCodeTokenType("break");
@@ -111,7 +129,7 @@ public interface ZenCodeTypes {
   IElementType T_EQUAL3 = new ZenCodeTokenType("===");
   IElementType T_FLOAT = new ZenCodeTokenType("T_FLOAT");
   IElementType T_GREATER = new ZenCodeTokenType(">");
-  IElementType T_GREATEREQ = new ZenCodeTokenType("T_GREATEREQ");
+  IElementType T_GREATEREQ = new ZenCodeTokenType(">=");
   IElementType T_IDENTIFIER = new ZenCodeTokenType("T_IDENTIFIER");
   IElementType T_INCREMENT = new ZenCodeTokenType("++");
   IElementType T_INT = new ZenCodeTokenType("T_INT");
@@ -155,5 +173,63 @@ public interface ZenCodeTypes {
   IElementType T_XORASSIGN = new ZenCodeTokenType("^=");
 
   class Factory {
+    public static PsiElement createElement(ASTNode node) {
+      IElementType type = node.getElementType();
+      if (type == EXPRESSION) {
+        return new ZenCodeExpressionImpl(node);
+      }
+      else if (type == EXPRESSION_BEP) {
+        return new ZenCodeExpressionBEPImpl(node);
+      }
+      else if (type == IMPORT) {
+        return new ZenCodeImportImpl(node);
+      }
+      else if (type == STATEMENT_BLOCK) {
+        return new ZenCodeStatementBlockImpl(node);
+      }
+      else if (type == STATEMENT_BREAK) {
+        return new ZenCodeStatementBreakImpl(node);
+      }
+      else if (type == STATEMENT_CONTINUE) {
+        return new ZenCodeStatementContinueImpl(node);
+      }
+      else if (type == STATEMENT_DO_WHILE) {
+        return new ZenCodeStatementDoWhileImpl(node);
+      }
+      else if (type == STATEMENT_EXPRESSION) {
+        return new ZenCodeStatementExpressionImpl(node);
+      }
+      else if (type == STATEMENT_FOR_EACH) {
+        return new ZenCodeStatementForEachImpl(node);
+      }
+      else if (type == STATEMENT_IF) {
+        return new ZenCodeStatementIfImpl(node);
+      }
+      else if (type == STATEMENT_LOCK) {
+        return new ZenCodeStatementLockImpl(node);
+      }
+      else if (type == STATEMENT_RETURN) {
+        return new ZenCodeStatementReturnImpl(node);
+      }
+      else if (type == STATEMENT_SWITCH) {
+        return new ZenCodeStatementSwitchImpl(node);
+      }
+      else if (type == STATEMENT_TRY_CATCH) {
+        return new ZenCodeStatementTryCatchImpl(node);
+      }
+      else if (type == STATEMENT_VAR) {
+        return new ZenCodeStatementVarImpl(node);
+      }
+      else if (type == STATEMENT_WHILE_DO) {
+        return new ZenCodeStatementWhileDoImpl(node);
+      }
+      else if (type == TYPE) {
+        return new ZenCodeTypeImpl(node);
+      }
+      else if (type == ZC_STRING_LITERAL) {
+        return new ZenCodeZCStringLiteralImpl(node);
+      }
+      throw new AssertionError("Unknown element type: " + type);
+    }
   }
 }
