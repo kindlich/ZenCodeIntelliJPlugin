@@ -7,10 +7,6 @@ import com.intellij.psi.PsiElement;
 
 public class ZenCodeVisitor extends PsiElementVisitor {
 
-  public void visitProperty(@NotNull ZenCodeProperty o) {
-    visitPsiElement(o);
-  }
-
   public void visitPsiElement(@NotNull PsiElement o) {
     visitElement(o);
   }

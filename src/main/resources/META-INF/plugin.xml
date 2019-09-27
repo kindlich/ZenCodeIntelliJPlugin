@@ -17,6 +17,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.blamejared.zencodeplugin.language.ZenCodeFileTypeFactory"/>
+        <lang.parserDefinition language="ZenCode" implementationClass="com.blamejared.zencodeplugin.flex.ZenCodeFlexParserDefinition"/>
     </extensions>
 
     <actions>

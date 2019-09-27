@@ -1,7 +1,12 @@
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version '0.4.10'
+    id "org.jetbrains.grammarkit" version "2019.2.1"
 }
+
+apply plugin: 'org.jetbrains.grammarkit'
+apply plugin: 'idea'
+
 
 group 'com.blamejared'
 version '1.0-SNAPSHOT'
@@ -23,4 +28,24 @@ patchPluginXml {
     changeNotes """
       Add change notes here.<br>
       <em>most HTML tags may be used</em>"""
+}
+
+sourceSets {
+    main {
+        java.srcDirs +="/src/main/gen/"
+    }
+}
+
+grammarKit {
+    // version of IntelliJ patched JFlex (see bintray link below), Default is 1.7.0-1 
+    jflexRelease = '1.7.0-1'
+
+    // tag or short commit hash of Grammar-Kit to use (see link below). Default is 2019.1.1
+    grammarKitRelease = '6452fde524'
+}
+
+idea {
+    module {
+        generatedSourceDirs += file("src/main/gen")
+    }
 }
