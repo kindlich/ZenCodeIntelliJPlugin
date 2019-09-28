@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface ZenCodeStatementTryCatch extends PsiElement {
 
   @NotNull
+  List<ZenCodeDeclareVariableName> getDeclareVariableNameList();
+
+  @NotNull
   List<ZenCodeStatementBlock> getStatementBlockList();
 
   @NotNull

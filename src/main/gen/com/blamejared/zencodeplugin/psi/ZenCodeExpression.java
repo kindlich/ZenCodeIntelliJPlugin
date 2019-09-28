@@ -20,6 +20,9 @@ public interface ZenCodeExpression extends PsiElement {
   List<ZenCodeType> getTypeList();
 
   @NotNull
+  List<ZenCodeVariableName> getVariableNameList();
+
+  @NotNull
   List<ZenCodeZCStringLiteral> getZCStringLiteralList();
 
 }

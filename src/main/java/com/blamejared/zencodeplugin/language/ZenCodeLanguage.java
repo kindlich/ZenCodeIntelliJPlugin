@@ -9,4 +9,5 @@ public class ZenCodeLanguage extends Language {
     private ZenCodeLanguage() {
         super("ZenCode", ".zc", ".zs");
     }
+    
 }

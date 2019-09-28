@@ -8,6 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface ZenCodeStatementForEach extends PsiElement {
 
   @NotNull
+  List<ZenCodeDeclareVariableName> getDeclareVariableNameList();
+
+  @NotNull
   ZenCodeExpression getExpression();
 
   @Nullable

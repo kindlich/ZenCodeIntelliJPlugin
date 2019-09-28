@@ -28,6 +28,12 @@ public class ZenCodeStatementForEachImpl extends ASTWrapperPsiElement implements
 
   @Override
   @NotNull
+  public List<ZenCodeDeclareVariableName> getDeclareVariableNameList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeDeclareVariableName.class);
+  }
+
+  @Override
+  @NotNull
   public ZenCodeExpression getExpression() {
     return findNotNullChildByClass(ZenCodeExpression.class);
   }

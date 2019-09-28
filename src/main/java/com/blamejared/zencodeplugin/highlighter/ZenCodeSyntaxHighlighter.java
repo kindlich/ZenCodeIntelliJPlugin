@@ -15,6 +15,9 @@ import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAtt
 
 public class ZenCodeSyntaxHighlighter extends SyntaxHighlighterBase {
     
+    public static final IElementType[] KEYWORD_ELEMENTS = new IElementType[]{K_ABSTRACT, K_ALIAS, K_AS, K_BOOL, K_BREAK, K_BYTE, K_CASE, K_CATCH, K_CHAR, K_CLASS, K_CONST, K_CONTINUE, K_DEFAULT, K_DO, K_DOUBLE, K_ELSE, K_ENUM, K_EXPAND, K_EXPANSION, K_EXPORT, K_EXTERN, K_FALSE, K_FINAL, K_FINALLY, K_FLOAT, K_FOR, K_FUNCTION, K_GET, K_IF, K_IMMUTABLE, K_IMPLEMENTS, K_IMPLICIT, K_IMPORT, K_IN, K_INT, K_INTERFACE, K_INTERNAL, K_IS, K_LOCK, K_LONG, K_MATCH, K_NEW, K_NULL, K_OVERRIDE, K_PANIC, K_PRIVATE, K_PROTECTED, K_PUBLIC, K_RETURN, K_SBYTE, K_SET, K_SHORT, K_STATIC, K_STRING, K_STRUCT, K_SUPER, K_SWITCH, K_THIS, K_THROW, K_THROWS, K_TRUE, K_TRY, K_UINT, K_ULONG, K_USHORT, K_USIZE, K_VAL, K_VAR, K_VARIANT, K_VIRTUAL, K_VOID, K_WHILE};
+    
+    
     public static final TextAttributesKey STRING_LITERAL = createTextAttributesKey("STRING_LITERAL", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey ZC_HIGHLIGHT_IDENTIFIER = createTextAttributesKey("ZC_HIGHLIGHT_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey ZC_HIGHLIGHT_NUMBER = createTextAttributesKey("ZC_HIGHLIGHT_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
@@ -88,7 +91,7 @@ public class ZenCodeSyntaxHighlighter extends SyntaxHighlighterBase {
             return ZC_HIGHLIGHT_PARENTHESES_ARRAY;
         if(equalsAny(tokenType, T_SQOPEN, T_SQCLOSE))
             return ZC_HIGHLIGHT_BRACKETS_ARRAY;
-        if(equalsAny(tokenType, K_ABSTRACT, K_ALIAS, K_AS, K_BOOL, K_BREAK, K_BYTE, K_CASE, K_CATCH, K_CHAR, K_CLASS, K_CONST, K_CONTINUE, K_DEFAULT, K_DO, K_DOUBLE, K_ELSE, K_ENUM, K_EXPAND, K_EXPANSION, K_EXPORT, K_EXTERN, K_FALSE, K_FINAL, K_FINALLY, K_FLOAT, K_FOR, K_FUNCTION, K_GET, K_IF, K_IMMUTABLE, K_IMPLEMENTS, K_IMPLICIT, K_IMPORT, K_IN, K_INT, K_INTERFACE, K_INTERNAL, K_IS, K_LOCK, K_LONG, K_MATCH, K_NEW, K_NULL, K_OVERRIDE, K_PANIC, K_PRIVATE, K_PROTECTED, K_PUBLIC, K_RETURN, K_SBYTE, K_SET, K_SHORT, K_STATIC, K_STRING, K_STRUCT, K_SUPER, K_SWITCH, K_THIS, K_THROW, K_THROWS, K_TRUE, K_TRY, K_UINT, K_ULONG, K_USHORT, K_USIZE, K_VAL, K_VAR, K_VARIANT, K_VIRTUAL, K_VOID, K_WHILE))
+        if(equalsAny(tokenType, KEYWORD_ELEMENTS))
             return ZC_HIGHLIGHT_KEYWORD_ARRAY;
         return EMPTY;
     }

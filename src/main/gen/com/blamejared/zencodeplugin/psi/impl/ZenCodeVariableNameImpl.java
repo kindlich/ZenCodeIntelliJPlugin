@@ -10,15 +10,16 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.blamejared.zencodeplugin.psi.ZenCodeTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.blamejared.zencodeplugin.psi.*;
+import com.intellij.psi.PsiReference;
 
-public class ZenCodeStatementVarImpl extends ASTWrapperPsiElement implements ZenCodeStatementVar {
+public class ZenCodeVariableNameImpl extends ASTWrapperPsiElement implements ZenCodeVariableName {
 
-  public ZenCodeStatementVarImpl(@NotNull ASTNode node) {
+  public ZenCodeVariableNameImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull ZenCodeVisitor visitor) {
-    visitor.visitStatementVar(this);
+    visitor.visitVariableName(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -28,20 +29,19 @@ public class ZenCodeStatementVarImpl extends ASTWrapperPsiElement implements Zen
 
   @Override
   @NotNull
-  public ZenCodeDeclareVariableName getDeclareVariableName() {
-    return findNotNullChildByClass(ZenCodeDeclareVariableName.class);
+  public PsiElement getTIdentifier() {
+    return findNotNullChildByType(T_IDENTIFIER);
   }
 
   @Override
-  @Nullable
-  public ZenCodeExpression getExpression() {
-    return findChildByClass(ZenCodeExpression.class);
+  public PsiElement setName(String newName) {
+    return ZenCodePsiImplUtil.setName(this, newName);
   }
 
   @Override
-  @Nullable
-  public ZenCodeType getType() {
-    return findChildByClass(ZenCodeType.class);
+  @NotNull
+  public PsiReference getReference() {
+    return ZenCodePsiImplUtil.getReference(this);
   }
 
 }

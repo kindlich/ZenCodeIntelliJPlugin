@@ -8,6 +8,7 @@ import com.blamejared.zencodeplugin.psi.impl.*;
 
 public interface ZenCodeTypes {
 
+  IElementType DECLARE_VARIABLE_NAME = new ZenCodeElementType("DECLARE_VARIABLE_NAME");
   IElementType EXPRESSION = new ZenCodeElementType("EXPRESSION");
   IElementType EXPRESSION_BEP = new ZenCodeElementType("EXPRESSION_BEP");
   IElementType IMPORT = new ZenCodeElementType("IMPORT");
@@ -25,6 +26,7 @@ public interface ZenCodeTypes {
   IElementType STATEMENT_VAR = new ZenCodeElementType("STATEMENT_VAR");
   IElementType STATEMENT_WHILE_DO = new ZenCodeElementType("STATEMENT_WHILE_DO");
   IElementType TYPE = new ZenCodeElementType("TYPE");
+  IElementType VARIABLE_NAME = new ZenCodeElementType("VARIABLE_NAME");
   IElementType ZC_STRING_LITERAL = new ZenCodeElementType("ZC_STRING_LITERAL");
 
   IElementType K_ABSTRACT = new ZenCodeTokenType("abstract");
@@ -175,7 +177,10 @@ public interface ZenCodeTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == EXPRESSION) {
+      if (type == DECLARE_VARIABLE_NAME) {
+        return new ZenCodeDeclareVariableNameImpl(node);
+      }
+      else if (type == EXPRESSION) {
         return new ZenCodeExpressionImpl(node);
       }
       else if (type == EXPRESSION_BEP) {
@@ -225,6 +230,9 @@ public interface ZenCodeTypes {
       }
       else if (type == TYPE) {
         return new ZenCodeTypeImpl(node);
+      }
+      else if (type == VARIABLE_NAME) {
+        return new ZenCodeVariableNameImpl(node);
       }
       else if (type == ZC_STRING_LITERAL) {
         return new ZenCodeZCStringLiteralImpl(node);

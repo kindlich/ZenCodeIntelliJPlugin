@@ -4,16 +4,16 @@ package com.blamejared.zencodeplugin.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
-public interface ZenCodeStatementVar extends PsiElement {
+public interface ZenCodeVariableName extends PsiElement {
 
   @NotNull
-  ZenCodeDeclareVariableName getDeclareVariableName();
+  PsiElement getTIdentifier();
 
-  @Nullable
-  ZenCodeExpression getExpression();
+  PsiElement setName(String newName);
 
-  @Nullable
-  ZenCodeType getType();
+  @NotNull
+  PsiReference getReference();
 
 }

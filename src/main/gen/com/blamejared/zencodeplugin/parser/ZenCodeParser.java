@@ -266,6 +266,18 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // T_IDENTIFIER
+  public static boolean DeclareVariableName(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DeclareVariableName")) return false;
+    if (!nextTokenIs(b, T_IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, T_IDENTIFIER);
+    exit_section_(b, m, DECLARE_VARIABLE_NAME, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // (Annotation*)? [DefinitionModifier*] (ClassDefinition|InterfaceDefinition|EnumDefinition|StructDefinition|AliasDefinition|FunctionDefinition|ExpansionDefinition|VariantDefinition)
   static boolean Definition(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Definition")) return false;
@@ -1279,11 +1291,12 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // ExpressionSimple | ExpressionArray | ExpressionMap | ExpressionBracket | ExpressionNew | ExpressionThrow | ExpressionPanic | ExpressionMatch | ExpressionBEP | ExpressionType
+  // ExpressionVariable | ExpressionSimple | ExpressionArray | ExpressionMap | ExpressionBracket | ExpressionNew | ExpressionThrow | ExpressionPanic | ExpressionMatch | ExpressionBEP | ExpressionType
   static boolean ExpressionPrimary(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionPrimary")) return false;
     boolean r;
-    r = ExpressionSimple(b, l + 1);
+    r = ExpressionVariable(b, l + 1);
+    if (!r) r = ExpressionSimple(b, l + 1);
     if (!r) r = ExpressionArray(b, l + 1);
     if (!r) r = ExpressionMap(b, l + 1);
     if (!r) r = ExpressionBracket(b, l + 1);
@@ -1432,6 +1445,12 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, T_QUEST);
     if (!r) r = consumeToken(b, T_NOT);
     return r;
+  }
+
+  /* ********************************************************** */
+  // VariableName
+  static boolean ExpressionVariable(PsiBuilder b, int l) {
+    return VariableName(b, l + 1);
   }
 
   /* ********************************************************** */
@@ -2075,13 +2094,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // K_FOR T_IDENTIFIER ((T_COMMA T_IDENTIFIER)*)? K_IN Expression Statement
+  // K_FOR DeclareVariableName ((T_COMMA DeclareVariableName)*)? K_IN Expression Statement
   public static boolean StatementForEach(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementForEach")) return false;
     if (!nextTokenIs(b, K_FOR)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, K_FOR, T_IDENTIFIER);
+    r = consumeToken(b, K_FOR);
+    r = r && DeclareVariableName(b, l + 1);
     r = r && StatementForEach_2(b, l + 1);
     r = r && consumeToken(b, K_IN);
     r = r && Expression(b, l + 1);
@@ -2090,14 +2110,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // ((T_COMMA T_IDENTIFIER)*)?
+  // ((T_COMMA DeclareVariableName)*)?
   private static boolean StatementForEach_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementForEach_2")) return false;
     StatementForEach_2_0(b, l + 1);
     return true;
   }
 
-  // (T_COMMA T_IDENTIFIER)*
+  // (T_COMMA DeclareVariableName)*
   private static boolean StatementForEach_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementForEach_2_0")) return false;
     while (true) {
@@ -2108,12 +2128,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // T_COMMA T_IDENTIFIER
+  // T_COMMA DeclareVariableName
   private static boolean StatementForEach_2_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementForEach_2_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, T_COMMA, T_IDENTIFIER);
+    r = consumeToken(b, T_COMMA);
+    r = r && DeclareVariableName(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -2249,7 +2270,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // K_TRY Statement (K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE)* [K_FINALLY Statement]
+  // K_TRY Statement (K_CATCH T_BROPEN DeclareVariableName K_AS Type T_AOPEN Statement T_ACLOSE)* [K_FINALLY Statement]
   public static boolean StatementTryCatch(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementTryCatch")) return false;
     if (!nextTokenIs(b, K_TRY)) return false;
@@ -2263,7 +2284,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // (K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE)*
+  // (K_CATCH T_BROPEN DeclareVariableName K_AS Type T_AOPEN Statement T_ACLOSE)*
   private static boolean StatementTryCatch_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementTryCatch_2")) return false;
     while (true) {
@@ -2274,12 +2295,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // K_CATCH T_BROPEN T_IDENTIFIER K_AS Type T_AOPEN Statement T_ACLOSE
+  // K_CATCH T_BROPEN DeclareVariableName K_AS Type T_AOPEN Statement T_ACLOSE
   private static boolean StatementTryCatch_2_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementTryCatch_2_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, K_CATCH, T_BROPEN, T_IDENTIFIER, K_AS);
+    r = consumeTokens(b, 0, K_CATCH, T_BROPEN);
+    r = r && DeclareVariableName(b, l + 1);
+    r = r && consumeToken(b, K_AS);
     r = r && Type(b, l + 1);
     r = r && consumeToken(b, T_AOPEN);
     r = r && Statement(b, l + 1);
@@ -2307,14 +2330,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (K_VAR|K_VAL) T_IDENTIFIER (K_AS Type)? [T_ASSIGN Expression] T_SEMICOLON
+  // (K_VAR|K_VAL) DeclareVariableName (K_AS Type)? [T_ASSIGN Expression] T_SEMICOLON
   public static boolean StatementVar(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StatementVar")) return false;
     if (!nextTokenIs(b, "<statement var>", K_VAL, K_VAR)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, STATEMENT_VAR, "<statement var>");
     r = StatementVar_0(b, l + 1);
-    r = r && consumeToken(b, T_IDENTIFIER);
+    r = r && DeclareVariableName(b, l + 1);
     r = r && StatementVar_2(b, l + 1);
     r = r && StatementVar_3(b, l + 1);
     r = r && consumeToken(b, T_SEMICOLON);
@@ -2785,6 +2808,18 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     boolean r;
     r = consumeToken(b, T_IDENTIFIER);
     if (!r) r = consumeToken(b, T_INT);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // T_IDENTIFIER
+  public static boolean VariableName(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "VariableName")) return false;
+    if (!nextTokenIs(b, T_IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, T_IDENTIFIER);
+    exit_section_(b, m, VARIABLE_NAME, r);
     return r;
   }
 

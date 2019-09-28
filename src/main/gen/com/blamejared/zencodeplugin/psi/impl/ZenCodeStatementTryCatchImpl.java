@@ -28,6 +28,12 @@ public class ZenCodeStatementTryCatchImpl extends ASTWrapperPsiElement implement
 
   @Override
   @NotNull
+  public List<ZenCodeDeclareVariableName> getDeclareVariableNameList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeDeclareVariableName.class);
+  }
+
+  @Override
+  @NotNull
   public List<ZenCodeStatementBlock> getStatementBlockList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeStatementBlock.class);
   }

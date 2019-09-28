@@ -24,7 +24,6 @@ public class ZenCodeFlexParserDefinition implements ParserDefinition {
     public static final TokenSet COMMENTS = TokenSet.create(T_COMMENT_SCRIPT, T_COMMENT_SINGLELINE, T_COMMENT_MULTILINE);
     public static final TokenSet STRING_LITERALS = TokenSet.create(ZC_STRING_LITERAL, T_STRING_DQ_WYSIWYG, T_STRING_SQ_WYSIWYG);
     
-    
     @NotNull
     @Override
     public Lexer createLexer(Project project) {

@@ -4,8 +4,13 @@ package com.blamejared.zencodeplugin.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 public class ZenCodeVisitor extends PsiElementVisitor {
+
+  public void visitDeclareVariableName(@NotNull ZenCodeDeclareVariableName o) {
+    visitPsiNameIdentifierOwner(o);
+  }
 
   public void visitExpression(@NotNull ZenCodeExpression o) {
     visitPsiElement(o);
@@ -75,8 +80,16 @@ public class ZenCodeVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitVariableName(@NotNull ZenCodeVariableName o) {
+    visitPsiElement(o);
+  }
+
   public void visitZCStringLiteral(@NotNull ZenCodeZCStringLiteral o) {
     visitPsiElement(o);
+  }
+
+  public void visitPsiNameIdentifierOwner(@NotNull PsiNameIdentifierOwner o) {
+    visitElement(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

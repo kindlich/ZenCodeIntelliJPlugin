@@ -21,6 +21,13 @@
                                implementationClass="com.blamejared.zencodeplugin.flex.ZenCodeFlexParserDefinition"/>
         <lang.syntaxHighlighterFactory language="ZenCode"
                                        implementationClass="com.blamejared.zencodeplugin.highlighter.ZenCodeSyntaxHighligherFactory"/>
+        <lang.refactoringSupport language="ZenCode"
+                                 implementationClass="com.blamejared.zencodeplugin.reference.VariableNameRefactoringSupportProvider"/>
+        <lang.namesValidator language="ZenCode"
+                             implementationClass="com.blamejared.zencodeplugin.reference.VariableNameNamesValidator"/>
+        <renamePsiElementProcessor implementation="com.blamejared.zencodeplugin.reference.VariableNameRenameProcessor"/>
+        <lang.findUsagesProvider language="ZenCode"
+                                 implementationClass="com.blamejared.zencodeplugin.reference.VariableNameFindUsagesProvider"/>
     </extensions>
 
     <actions>
