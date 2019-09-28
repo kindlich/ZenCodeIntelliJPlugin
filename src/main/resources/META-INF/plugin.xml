@@ -28,10 +28,19 @@
         <renamePsiElementProcessor implementation="com.blamejared.zencodeplugin.reference.VariableNameRenameProcessor"/>
         <lang.findUsagesProvider language="ZenCode"
                                  implementationClass="com.blamejared.zencodeplugin.reference.VariableNameFindUsagesProvider"/>
+        <completion.contributor
+                language="ZenCode"
+                implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeCompletionContributor"/>
+        <projectConfigurable instance="com.blamejared.zencodeplugin.components.ZenCodeSettingsPanel"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
 
     </actions>
+    <application-components>
+        <component>
+            <implementation-class>com.blamejared.zencodeplugin.components.ZenCodeProjectComponent</implementation-class>
+        </component>
+    </application-components>
 </idea-plugin>

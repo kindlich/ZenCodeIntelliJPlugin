@@ -17,12 +17,29 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.blamejared.zencodeplugin.language.ZenCodeFileTypeFactory"/>
-        <lang.parserDefinition language=""
-                               implementationClass="com.blamejared.zencodeplugin.parserdefinition.ZenCodeParserDefinition"/>
+        <lang.parserDefinition language="ZenCode"
+                               implementationClass="com.blamejared.zencodeplugin.flex.ZenCodeFlexParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="ZenCode"
+                                       implementationClass="com.blamejared.zencodeplugin.highlighter.ZenCodeSyntaxHighligherFactory"/>
+        <lang.refactoringSupport language="ZenCode"
+                                 implementationClass="com.blamejared.zencodeplugin.reference.VariableNameRefactoringSupportProvider"/>
+        <lang.namesValidator language="ZenCode"
+                             implementationClass="com.blamejared.zencodeplugin.reference.VariableNameNamesValidator"/>
+        <renamePsiElementProcessor implementation="com.blamejared.zencodeplugin.reference.VariableNameRenameProcessor"/>
+        <lang.findUsagesProvider language="ZenCode"
+                                 implementationClass="com.blamejared.zencodeplugin.reference.VariableNameFindUsagesProvider"/>
+        <completion.contributor
+                language="ZenCode"
+                implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeCompletionContributor"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
 
     </actions>
+    <project-components>
+        <component>
+            <implementation-class>com.blamejared.zencodeplugin.components.ZenCodeProjectComponent</implementation-class>
+        </component>
+    </project-components>
 </idea-plugin>
