@@ -11,6 +11,12 @@ import static com.intellij.patterns.StandardPatterns.or;
 public class ZenCodeCompletionContributor extends CompletionContributor {
     
     public ZenCodeCompletionContributor() {
-        extend(CompletionType.BASIC, psiElement(T_IDENTIFIER).afterSiblingSkipping(or(psiElement().whitespace(), psiElement(T_COLON), psiElement(T_IDENTIFIER), psiElement(T_INT)), psiElement(T_LESS)), new BracketCompletionProvider());
+        //extend(CompletionType.BASIC, psiElement(T_IDENTIFIER).afterSiblingSkipping(or(psiElement().whitespace(), psiElement(T_COLON), psiElement(T_IDENTIFIER), psiElement(T_INT)), psiElement(T_LESS)), new BracketCompletionProvider());
+        
+        extend(CompletionType.BASIC, or(
+                psiElement(T_IDENTIFIER).afterSiblingSkipping(or(psiElement().whitespace(), psiElement(T_COLON), psiElement(T_IDENTIFIER), psiElement(T_INT)), psiElement(T_LESS)),
+                psiElement(T_COLON).afterSiblingSkipping(or(psiElement().whitespace(), psiElement(T_COLON), psiElement(T_IDENTIFIER), psiElement(T_INT)), psiElement(T_LESS)),
+                psiElement(T_INT).afterSiblingSkipping(or(psiElement().whitespace(), psiElement(T_COLON), psiElement(T_IDENTIFIER), psiElement(T_INT)), psiElement(T_LESS))
+        ), new BracketCompletionProvider());
     }
 }
