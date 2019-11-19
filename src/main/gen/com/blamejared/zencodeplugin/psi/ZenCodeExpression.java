@@ -8,21 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface ZenCodeExpression extends PsiElement {
 
   @NotNull
-  List<ZenCodeExpression> getExpressionList();
-
-  @NotNull
-  List<ZenCodeExpressionBEP> getExpressionBEPList();
-
-  @NotNull
-  List<ZenCodeStatementBlock> getStatementBlockList();
-
-  @NotNull
-  List<ZenCodeType> getTypeList();
-
-  @NotNull
-  List<ZenCodeVariableName> getVariableNameList();
-
-  @NotNull
-  List<ZenCodeZCStringLiteral> getZCStringLiteralList();
+  ZenCodeExpressionAssign getExpressionAssign();
 
 }

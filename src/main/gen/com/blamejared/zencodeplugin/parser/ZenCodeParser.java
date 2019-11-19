@@ -6,7 +6,6 @@ import com.intellij.lang.PsiBuilder.Marker;
 import static com.blamejared.zencodeplugin.psi.ZenCodeTypes.*;
 import static com.blamejared.zencodeplugin.parser.ZenCodeParserUtil.*;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.psi.tree.IFileElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.lang.PsiParser;
@@ -24,27 +23,28 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     boolean r;
     b = adapt_builder_(t, b, this, null);
     Marker m = enter_section_(b, 0, _COLLAPSE_, null);
-    if (t instanceof IFileElementType) {
-      r = parse_root_(t, b, 0);
-    }
-    else {
-      r = false;
-    }
+    r = parse_root_(t, b);
     exit_section_(b, 0, m, t, r, true, TRUE_CONDITION);
   }
 
-  protected boolean parse_root_(IElementType t, PsiBuilder b, int l) {
+  protected boolean parse_root_(IElementType t, PsiBuilder b) {
+    return parse_root_(t, b, 0);
+  }
+
+  static boolean parse_root_(IElementType t, PsiBuilder b, int l) {
     return ZenCodeFile(b, l + 1);
   }
 
   /* ********************************************************** */
   // T_ADD | T_SUB | T_CAT
-  static boolean AddOperator(PsiBuilder b, int l) {
+  public static boolean AddOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "AddOperator")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, ADD_OPERATOR, "<add operator>");
     r = consumeToken(b, T_ADD);
     if (!r) r = consumeToken(b, T_SUB);
     if (!r) r = consumeToken(b, T_CAT);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -112,9 +112,10 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_ASSIGN | T_ADDASSIGN | T_SUBASSIGN | T_CATASSIGN | T_MULASSIGN | T_DIVASSIGN | T_MODASSIGN | T_ORASSIGN | T_ANDASSIGN | T_XORASSIGN | T_SHLASSIGN | T_SHRASSIGN | T_USHRASSIGN
-  static boolean AssignOperator(PsiBuilder b, int l) {
+  public static boolean AssignOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "AssignOperator")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, ASSIGN_OPERATOR, "<assign operator>");
     r = consumeToken(b, T_ASSIGN);
     if (!r) r = consumeToken(b, T_ADDASSIGN);
     if (!r) r = consumeToken(b, T_SUBASSIGN);
@@ -128,12 +129,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, T_SHLASSIGN);
     if (!r) r = consumeToken(b, T_SHRASSIGN);
     if (!r) r = consumeToken(b, T_USHRASSIGN);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
   // T_BROPEN [Expression [(T_COMMA Expression)*]] T_BRCLOSE
-  static boolean CallArguments(PsiBuilder b, int l) {
+  public static boolean CallArguments(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "CallArguments")) return false;
     if (!nextTokenIs(b, T_BROPEN)) return false;
     boolean r;
@@ -141,7 +143,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, T_BROPEN);
     r = r && CallArguments_1(b, l + 1);
     r = r && consumeToken(b, T_BRCLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, CALL_ARGUMENTS, r);
     return r;
   }
 
@@ -226,10 +228,10 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_EQUAL2 | T_EQUAL3 | T_NOTEQUAL | T_NOTEQUAL2 | T_LESS | T_LESSEQ | T_GREATER | T_GREATEREQ | K_IN | K_IS | (T_NOT (K_IN | K_IS))
-  static boolean CompareOperator(PsiBuilder b, int l) {
+  public static boolean CompareOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "CompareOperator")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, COMPARE_OPERATOR, "<compare operator>");
     r = consumeToken(b, T_EQUAL2);
     if (!r) r = consumeToken(b, T_EQUAL3);
     if (!r) r = consumeToken(b, T_NOTEQUAL);
@@ -241,7 +243,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, K_IN);
     if (!r) r = consumeToken(b, K_IS);
     if (!r) r = CompareOperator_10(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -428,7 +430,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   public static boolean Expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Expression")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, EXPRESSION, "<expression>");
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION, "<expression>");
     r = ExpressionAssign(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
@@ -436,13 +438,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionMul [(AddOperator ExpressionMul)*]
-  static boolean ExpressionAdd(PsiBuilder b, int l) {
+  public static boolean ExpressionAdd(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionAdd")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_ADD, "<expression add>");
     r = ExpressionMul(b, l + 1);
     r = r && ExpressionAdd_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -477,13 +479,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionCompare [(T_AND ExpressionCompare)*]
-  static boolean ExpressionAnd(PsiBuilder b, int l) {
+  public static boolean ExpressionAnd(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionAnd")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_AND, "<expression and>");
     r = ExpressionCompare(b, l + 1);
     r = r && ExpressionAnd_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -518,13 +520,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionOr [(T_ANDAND ExpressionOr)*]
-  static boolean ExpressionAndAnd(PsiBuilder b, int l) {
+  public static boolean ExpressionAndAnd(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionAndAnd")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_AND_AND, "<expression and and>");
     r = ExpressionOr(b, l + 1);
     r = r && ExpressionAndAnd_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -559,7 +561,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_SQOPEN [Expression [(T_COMMA Expression)*]] T_SQCLOSE
-  static boolean ExpressionArray(PsiBuilder b, int l) {
+  public static boolean ExpressionArray(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionArray")) return false;
     if (!nextTokenIs(b, T_SQOPEN)) return false;
     boolean r;
@@ -567,7 +569,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, T_SQOPEN);
     r = r && ExpressionArray_1(b, l + 1);
     r = r && consumeToken(b, T_SQCLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_ARRAY, r);
     return r;
   }
 
@@ -620,13 +622,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionConditional [AssignOperator ExpressionAssign]
-  static boolean ExpressionAssign(PsiBuilder b, int l) {
+  public static boolean ExpressionAssign(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionAssign")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_ASSIGN, "<expression assign>");
     r = ExpressionConditional(b, l + 1);
     r = r && ExpressionAssign_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -693,7 +695,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_BROPEN ExpressionAssign [(T_COMMA ExpressionAssign)] T_BRCLOSE
-  static boolean ExpressionBracket(PsiBuilder b, int l) {
+  public static boolean ExpressionBracket(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionBracket")) return false;
     if (!nextTokenIs(b, T_BROPEN)) return false;
     boolean r;
@@ -702,7 +704,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && ExpressionAssign(b, l + 1);
     r = r && ExpressionBracket_2(b, l + 1);
     r = r && consumeToken(b, T_BRCLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_BRACKET, r);
     return r;
   }
 
@@ -726,13 +728,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionShift [CompareOperator ExpressionShift]
-  static boolean ExpressionCompare(PsiBuilder b, int l) {
+  public static boolean ExpressionCompare(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionCompare")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_COMPARE, "<expression compare>");
     r = ExpressionShift(b, l + 1);
     r = r && ExpressionCompare_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -756,13 +758,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionOrOr [T_QUEST Expression T_COLON Expression]
-  static boolean ExpressionConditional(PsiBuilder b, int l) {
+  public static boolean ExpressionConditional(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionConditional")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_CONDITIONAL, "<expression conditional>");
     r = ExpressionOrOr(b, l + 1);
     r = r && ExpressionConditional_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -805,7 +807,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_AOPEN [MapPair [(T_COMMA MapPair)*]] T_ACLOSE
-  static boolean ExpressionMap(PsiBuilder b, int l) {
+  public static boolean ExpressionMap(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMap")) return false;
     if (!nextTokenIs(b, T_AOPEN)) return false;
     boolean r;
@@ -813,7 +815,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, T_AOPEN);
     r = r && ExpressionMap_1(b, l + 1);
     r = r && consumeToken(b, T_ACLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_MAP, r);
     return r;
   }
 
@@ -866,7 +868,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_MATCH Expression T_AOPEN [MatchCase [(T_COMMA MatchCase)*]] T_ACLOSE
-  static boolean ExpressionMatch(PsiBuilder b, int l) {
+  public static boolean ExpressionMatch(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMatch")) return false;
     if (!nextTokenIs(b, K_MATCH)) return false;
     boolean r;
@@ -876,7 +878,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = r && consumeToken(b, T_AOPEN);
     r = r && ExpressionMatch_3(b, l + 1);
     r = r && consumeToken(b, T_ACLOSE);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_MATCH, r);
     return r;
   }
 
@@ -929,13 +931,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionUnary [(MulOperator ExpressionUnary)*]
-  static boolean ExpressionMul(PsiBuilder b, int l) {
+  public static boolean ExpressionMul(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionMul")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_MUL, "<expression mul>");
     r = ExpressionUnary(b, l + 1);
     r = r && ExpressionMul_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -970,7 +972,7 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_NEW Type CallArguments
-  static boolean ExpressionNew(PsiBuilder b, int l) {
+  public static boolean ExpressionNew(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionNew")) return false;
     if (!nextTokenIs(b, K_NEW)) return false;
     boolean r;
@@ -978,19 +980,19 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, K_NEW);
     r = r && Type(b, l + 1);
     r = r && CallArguments(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_NEW, r);
     return r;
   }
 
   /* ********************************************************** */
   // ExpressionXor [(T_OR ExpressionXor)*]
-  static boolean ExpressionOr(PsiBuilder b, int l) {
+  public static boolean ExpressionOr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionOr")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_OR, "<expression or>");
     r = ExpressionXor(b, l + 1);
     r = r && ExpressionOr_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1025,14 +1027,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionAndAnd [(T_OROR ExpressionAndAnd)*] [(T_COALESCE ExpressionAndAnd)*]
-  static boolean ExpressionOrOr(PsiBuilder b, int l) {
+  public static boolean ExpressionOrOr(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionOrOr")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_OR_OR, "<expression or or>");
     r = ExpressionAndAnd(b, l + 1);
     r = r && ExpressionOrOr_1(b, l + 1);
     r = r && ExpressionOrOr_2(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1096,14 +1098,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_PANIC Expression
-  static boolean ExpressionPanic(PsiBuilder b, int l) {
+  public static boolean ExpressionPanic(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionPanic")) return false;
     if (!nextTokenIs(b, K_PANIC)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, K_PANIC);
     r = r && Expression(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_PANIC, r);
     return r;
   }
 
@@ -1117,13 +1119,13 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
   //                                      | T_INCREMENT | T_DECREMENT //Postfix
   //                                      | (T_LAMBDA LambdaBody)
   //                                )*]
-  static boolean ExpressionPostFix(PsiBuilder b, int l) {
+  public static boolean ExpressionPostFix(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionPostFix")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_POST_FIX, "<expression post fix>");
     r = ExpressionPrimary(b, l + 1);
     r = r && ExpressionPostFix_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1292,9 +1294,10 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // ExpressionVariable | ExpressionSimple | ExpressionArray | ExpressionMap | ExpressionBracket | ExpressionNew | ExpressionThrow | ExpressionPanic | ExpressionMatch | ExpressionBEP | ExpressionType
-  static boolean ExpressionPrimary(PsiBuilder b, int l) {
+  public static boolean ExpressionPrimary(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionPrimary")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_PRIMARY, "<expression primary>");
     r = ExpressionVariable(b, l + 1);
     if (!r) r = ExpressionSimple(b, l + 1);
     if (!r) r = ExpressionArray(b, l + 1);
@@ -1306,18 +1309,19 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
     if (!r) r = ExpressionMatch(b, l + 1);
     if (!r) r = ExpressionBEP(b, l + 1);
     if (!r) r = ExpressionType(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
   // ExpressionAdd [(ShiftOperator ExpressionAdd)*]
-  static boolean ExpressionShift(PsiBuilder b, int l) {
+  public static boolean ExpressionShift(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionShift")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_SHIFT, "<expression shift>");
     r = ExpressionAdd(b, l + 1);
     r = r && ExpressionShift_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1364,14 +1368,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // K_THROW Expression
-  static boolean ExpressionThrow(PsiBuilder b, int l) {
+  public static boolean ExpressionThrow(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionThrow")) return false;
     if (!nextTokenIs(b, K_THROW)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, K_THROW);
     r = r && Expression(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, m, EXPRESSION_THROW, r);
     return r;
   }
 
@@ -1383,14 +1387,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // (UnaryOperator ExpressionUnary) | ExpressionPostFix | (K_TRY ((T_QUEST | T_NOT) ExpressionUnary) | ExpressionPostFix)
-  static boolean ExpressionUnary(PsiBuilder b, int l) {
+  public static boolean ExpressionUnary(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionUnary")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _COLLAPSE_, EXPRESSION_UNARY, "<expression unary>");
     r = ExpressionUnary_0(b, l + 1);
     if (!r) r = ExpressionPostFix(b, l + 1);
     if (!r) r = ExpressionUnary_2(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1449,19 +1453,25 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // VariableName
-  static boolean ExpressionVariable(PsiBuilder b, int l) {
-    return VariableName(b, l + 1);
+  public static boolean ExpressionVariable(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ExpressionVariable")) return false;
+    if (!nextTokenIs(b, T_IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = VariableName(b, l + 1);
+    exit_section_(b, m, EXPRESSION_VARIABLE, r);
+    return r;
   }
 
   /* ********************************************************** */
   // ExpressionAnd [(T_XOR ExpressionAnd)*]
-  static boolean ExpressionXor(PsiBuilder b, int l) {
+  public static boolean ExpressionXor(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ExpressionXor")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, EXPRESSION_XOR, "<expression xor>");
     r = ExpressionAnd(b, l + 1);
     r = r && ExpressionXor_1(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1801,37 +1811,39 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // StatementBlock | Expression
-  static boolean LambdaBody(PsiBuilder b, int l) {
+  public static boolean LambdaBody(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "LambdaBody")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LAMBDA_BODY, "<lambda body>");
     r = StatementBlock(b, l + 1);
     if (!r) r = Expression(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
   // ExpressionAssign T_COLON ExpressionAssign
-  static boolean MapPair(PsiBuilder b, int l) {
+  public static boolean MapPair(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MapPair")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, MAP_PAIR, "<map pair>");
     r = ExpressionAssign(b, l + 1);
     r = r && consumeToken(b, T_COLON);
     r = r && ExpressionAssign(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
   // (K_DEFAULT | Expression) T_LAMBDA Expression
-  static boolean MatchCase(PsiBuilder b, int l) {
+  public static boolean MatchCase(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MatchCase")) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, MATCH_CASE, "<match case>");
     r = MatchCase_0(b, l + 1);
     r = r && consumeToken(b, T_LAMBDA);
     r = r && Expression(b, l + 1);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1858,12 +1870,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_MUL | T_DIV | T_MOD
-  static boolean MulOperator(PsiBuilder b, int l) {
+  public static boolean MulOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "MulOperator")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, MUL_OPERATOR, "<mul operator>");
     r = consumeToken(b, T_MUL);
     if (!r) r = consumeToken(b, T_DIV);
     if (!r) r = consumeToken(b, T_MOD);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -1961,12 +1975,14 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_SHL | T_SHR | T_USHR
-  static boolean ShiftOperator(PsiBuilder b, int l) {
+  public static boolean ShiftOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ShiftOperator")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, SHIFT_OPERATOR, "<shift operator>");
     r = consumeToken(b, T_SHL);
     if (!r) r = consumeToken(b, T_SHR);
     if (!r) r = consumeToken(b, T_USHR);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -2543,9 +2559,11 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // [T_LESS Type [(T_COMMA Type)*] T_GREATER]
-  static boolean TypeArguments(PsiBuilder b, int l) {
+  public static boolean TypeArguments(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "TypeArguments")) return false;
+    Marker m = enter_section_(b, l, _NONE_, TYPE_ARGUMENTS, "<type arguments>");
     TypeArguments_0(b, l + 1);
+    exit_section_(b, l, m, true, false, null);
     return true;
   }
 
@@ -2789,14 +2807,16 @@ public class ZenCodeParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_NOT | T_SUB | T_CAT | T_INCREMENT | T_DECREMENT
-  static boolean UnaryOperator(PsiBuilder b, int l) {
+  public static boolean UnaryOperator(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "UnaryOperator")) return false;
     boolean r;
+    Marker m = enter_section_(b, l, _NONE_, UNARY_OPERATOR, "<unary operator>");
     r = consumeToken(b, T_NOT);
     if (!r) r = consumeToken(b, T_SUB);
     if (!r) r = consumeToken(b, T_CAT);
     if (!r) r = consumeToken(b, T_INCREMENT);
     if (!r) r = consumeToken(b, T_DECREMENT);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 

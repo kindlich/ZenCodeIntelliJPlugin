@@ -8,10 +8,41 @@ import com.blamejared.zencodeplugin.psi.impl.*;
 
 public interface ZenCodeTypes {
 
+  IElementType ADD_OPERATOR = new ZenCodeElementType("ADD_OPERATOR");
+  IElementType ASSIGN_OPERATOR = new ZenCodeElementType("ASSIGN_OPERATOR");
+  IElementType CALL_ARGUMENTS = new ZenCodeElementType("CALL_ARGUMENTS");
+  IElementType COMPARE_OPERATOR = new ZenCodeElementType("COMPARE_OPERATOR");
   IElementType DECLARE_VARIABLE_NAME = new ZenCodeElementType("DECLARE_VARIABLE_NAME");
   IElementType EXPRESSION = new ZenCodeElementType("EXPRESSION");
+  IElementType EXPRESSION_ADD = new ZenCodeElementType("EXPRESSION_ADD");
+  IElementType EXPRESSION_AND = new ZenCodeElementType("EXPRESSION_AND");
+  IElementType EXPRESSION_AND_AND = new ZenCodeElementType("EXPRESSION_AND_AND");
+  IElementType EXPRESSION_ARRAY = new ZenCodeElementType("EXPRESSION_ARRAY");
+  IElementType EXPRESSION_ASSIGN = new ZenCodeElementType("EXPRESSION_ASSIGN");
   IElementType EXPRESSION_BEP = new ZenCodeElementType("EXPRESSION_BEP");
+  IElementType EXPRESSION_BRACKET = new ZenCodeElementType("EXPRESSION_BRACKET");
+  IElementType EXPRESSION_COMPARE = new ZenCodeElementType("EXPRESSION_COMPARE");
+  IElementType EXPRESSION_CONDITIONAL = new ZenCodeElementType("EXPRESSION_CONDITIONAL");
+  IElementType EXPRESSION_MAP = new ZenCodeElementType("EXPRESSION_MAP");
+  IElementType EXPRESSION_MATCH = new ZenCodeElementType("EXPRESSION_MATCH");
+  IElementType EXPRESSION_MUL = new ZenCodeElementType("EXPRESSION_MUL");
+  IElementType EXPRESSION_NEW = new ZenCodeElementType("EXPRESSION_NEW");
+  IElementType EXPRESSION_OR = new ZenCodeElementType("EXPRESSION_OR");
+  IElementType EXPRESSION_OR_OR = new ZenCodeElementType("EXPRESSION_OR_OR");
+  IElementType EXPRESSION_PANIC = new ZenCodeElementType("EXPRESSION_PANIC");
+  IElementType EXPRESSION_POST_FIX = new ZenCodeElementType("EXPRESSION_POST_FIX");
+  IElementType EXPRESSION_PRIMARY = new ZenCodeElementType("EXPRESSION_PRIMARY");
+  IElementType EXPRESSION_SHIFT = new ZenCodeElementType("EXPRESSION_SHIFT");
+  IElementType EXPRESSION_THROW = new ZenCodeElementType("EXPRESSION_THROW");
+  IElementType EXPRESSION_UNARY = new ZenCodeElementType("EXPRESSION_UNARY");
+  IElementType EXPRESSION_VARIABLE = new ZenCodeElementType("EXPRESSION_VARIABLE");
+  IElementType EXPRESSION_XOR = new ZenCodeElementType("EXPRESSION_XOR");
   IElementType IMPORT = new ZenCodeElementType("IMPORT");
+  IElementType LAMBDA_BODY = new ZenCodeElementType("LAMBDA_BODY");
+  IElementType MAP_PAIR = new ZenCodeElementType("MAP_PAIR");
+  IElementType MATCH_CASE = new ZenCodeElementType("MATCH_CASE");
+  IElementType MUL_OPERATOR = new ZenCodeElementType("MUL_OPERATOR");
+  IElementType SHIFT_OPERATOR = new ZenCodeElementType("SHIFT_OPERATOR");
   IElementType STATEMENT_BLOCK = new ZenCodeElementType("STATEMENT_BLOCK");
   IElementType STATEMENT_BREAK = new ZenCodeElementType("STATEMENT_BREAK");
   IElementType STATEMENT_CONTINUE = new ZenCodeElementType("STATEMENT_CONTINUE");
@@ -26,6 +57,8 @@ public interface ZenCodeTypes {
   IElementType STATEMENT_VAR = new ZenCodeElementType("STATEMENT_VAR");
   IElementType STATEMENT_WHILE_DO = new ZenCodeElementType("STATEMENT_WHILE_DO");
   IElementType TYPE = new ZenCodeElementType("TYPE");
+  IElementType TYPE_ARGUMENTS = new ZenCodeElementType("TYPE_ARGUMENTS");
+  IElementType UNARY_OPERATOR = new ZenCodeElementType("UNARY_OPERATOR");
   IElementType VARIABLE_NAME = new ZenCodeElementType("VARIABLE_NAME");
   IElementType ZC_STRING_LITERAL = new ZenCodeElementType("ZC_STRING_LITERAL");
 
@@ -177,17 +210,110 @@ public interface ZenCodeTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == DECLARE_VARIABLE_NAME) {
+      if (type == ADD_OPERATOR) {
+        return new ZenCodeAddOperatorImpl(node);
+      }
+      else if (type == ASSIGN_OPERATOR) {
+        return new ZenCodeAssignOperatorImpl(node);
+      }
+      else if (type == CALL_ARGUMENTS) {
+        return new ZenCodeCallArgumentsImpl(node);
+      }
+      else if (type == COMPARE_OPERATOR) {
+        return new ZenCodeCompareOperatorImpl(node);
+      }
+      else if (type == DECLARE_VARIABLE_NAME) {
         return new ZenCodeDeclareVariableNameImpl(node);
       }
       else if (type == EXPRESSION) {
         return new ZenCodeExpressionImpl(node);
       }
+      else if (type == EXPRESSION_ADD) {
+        return new ZenCodeExpressionAddImpl(node);
+      }
+      else if (type == EXPRESSION_AND) {
+        return new ZenCodeExpressionAndImpl(node);
+      }
+      else if (type == EXPRESSION_AND_AND) {
+        return new ZenCodeExpressionAndAndImpl(node);
+      }
+      else if (type == EXPRESSION_ARRAY) {
+        return new ZenCodeExpressionArrayImpl(node);
+      }
+      else if (type == EXPRESSION_ASSIGN) {
+        return new ZenCodeExpressionAssignImpl(node);
+      }
       else if (type == EXPRESSION_BEP) {
         return new ZenCodeExpressionBEPImpl(node);
       }
+      else if (type == EXPRESSION_BRACKET) {
+        return new ZenCodeExpressionBracketImpl(node);
+      }
+      else if (type == EXPRESSION_COMPARE) {
+        return new ZenCodeExpressionCompareImpl(node);
+      }
+      else if (type == EXPRESSION_CONDITIONAL) {
+        return new ZenCodeExpressionConditionalImpl(node);
+      }
+      else if (type == EXPRESSION_MAP) {
+        return new ZenCodeExpressionMapImpl(node);
+      }
+      else if (type == EXPRESSION_MATCH) {
+        return new ZenCodeExpressionMatchImpl(node);
+      }
+      else if (type == EXPRESSION_MUL) {
+        return new ZenCodeExpressionMulImpl(node);
+      }
+      else if (type == EXPRESSION_NEW) {
+        return new ZenCodeExpressionNewImpl(node);
+      }
+      else if (type == EXPRESSION_OR) {
+        return new ZenCodeExpressionOrImpl(node);
+      }
+      else if (type == EXPRESSION_OR_OR) {
+        return new ZenCodeExpressionOrOrImpl(node);
+      }
+      else if (type == EXPRESSION_PANIC) {
+        return new ZenCodeExpressionPanicImpl(node);
+      }
+      else if (type == EXPRESSION_POST_FIX) {
+        return new ZenCodeExpressionPostFixImpl(node);
+      }
+      else if (type == EXPRESSION_PRIMARY) {
+        return new ZenCodeExpressionPrimaryImpl(node);
+      }
+      else if (type == EXPRESSION_SHIFT) {
+        return new ZenCodeExpressionShiftImpl(node);
+      }
+      else if (type == EXPRESSION_THROW) {
+        return new ZenCodeExpressionThrowImpl(node);
+      }
+      else if (type == EXPRESSION_UNARY) {
+        return new ZenCodeExpressionUnaryImpl(node);
+      }
+      else if (type == EXPRESSION_VARIABLE) {
+        return new ZenCodeExpressionVariableImpl(node);
+      }
+      else if (type == EXPRESSION_XOR) {
+        return new ZenCodeExpressionXorImpl(node);
+      }
       else if (type == IMPORT) {
         return new ZenCodeImportImpl(node);
+      }
+      else if (type == LAMBDA_BODY) {
+        return new ZenCodeLambdaBodyImpl(node);
+      }
+      else if (type == MAP_PAIR) {
+        return new ZenCodeMapPairImpl(node);
+      }
+      else if (type == MATCH_CASE) {
+        return new ZenCodeMatchCaseImpl(node);
+      }
+      else if (type == MUL_OPERATOR) {
+        return new ZenCodeMulOperatorImpl(node);
+      }
+      else if (type == SHIFT_OPERATOR) {
+        return new ZenCodeShiftOperatorImpl(node);
       }
       else if (type == STATEMENT_BLOCK) {
         return new ZenCodeStatementBlockImpl(node);
@@ -230,6 +356,12 @@ public interface ZenCodeTypes {
       }
       else if (type == TYPE) {
         return new ZenCodeTypeImpl(node);
+      }
+      else if (type == TYPE_ARGUMENTS) {
+        return new ZenCodeTypeArgumentsImpl(node);
+      }
+      else if (type == UNARY_OPERATOR) {
+        return new ZenCodeUnaryOperatorImpl(node);
       }
       else if (type == VARIABLE_NAME) {
         return new ZenCodeVariableNameImpl(node);

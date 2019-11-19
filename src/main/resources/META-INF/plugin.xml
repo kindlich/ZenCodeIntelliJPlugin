@@ -32,6 +32,7 @@
                 language="ZenCode"
                 implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeCompletionContributor"/>
         <projectConfigurable instance="com.blamejared.zencodeplugin.components.ZenCodeSettingsPanel"/>
+        <annotator language="ZenCode" implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeAnnotator"/>
     </extensions>
 
     <actions>

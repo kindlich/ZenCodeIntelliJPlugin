@@ -28,38 +28,8 @@ public class ZenCodeExpressionImpl extends ASTWrapperPsiElement implements ZenCo
 
   @Override
   @NotNull
-  public List<ZenCodeExpression> getExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeExpression.class);
-  }
-
-  @Override
-  @NotNull
-  public List<ZenCodeExpressionBEP> getExpressionBEPList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeExpressionBEP.class);
-  }
-
-  @Override
-  @NotNull
-  public List<ZenCodeStatementBlock> getStatementBlockList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeStatementBlock.class);
-  }
-
-  @Override
-  @NotNull
-  public List<ZenCodeType> getTypeList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeType.class);
-  }
-
-  @Override
-  @NotNull
-  public List<ZenCodeVariableName> getVariableNameList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeVariableName.class);
-  }
-
-  @Override
-  @NotNull
-  public List<ZenCodeZCStringLiteral> getZCStringLiteralList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, ZenCodeZCStringLiteral.class);
+  public ZenCodeExpressionAssign getExpressionAssign() {
+    return findNotNullChildByClass(ZenCodeExpressionAssign.class);
   }
 
 }

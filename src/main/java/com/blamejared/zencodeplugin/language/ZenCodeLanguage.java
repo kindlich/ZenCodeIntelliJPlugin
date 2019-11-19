@@ -7,7 +7,7 @@ public class ZenCodeLanguage extends Language {
     public static final ZenCodeLanguage INSTANCE = new ZenCodeLanguage();
     
     private ZenCodeLanguage() {
-        super("ZenCode", ".zc", ".zs");
+        super("ZenCode");
     }
     
 }
