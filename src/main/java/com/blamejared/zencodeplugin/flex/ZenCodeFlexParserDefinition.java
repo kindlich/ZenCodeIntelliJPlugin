@@ -22,7 +22,7 @@ public class ZenCodeFlexParserDefinition implements ParserDefinition {
     
     public static final TokenSet WHITE_SPACES = TokenSet.create(T_WHITESPACE_CARRIAGE_RETURN, T_WHITESPACE_NEWLINE, T_WHITESPACE_SPACE, T_WHITESPACE_TAB, TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(T_COMMENT_SCRIPT, T_COMMENT_SINGLELINE, T_COMMENT_MULTILINE);
-    public static final TokenSet STRING_LITERALS = TokenSet.create(ZC_STRING_LITERAL, T_STRING_DQ_WYSIWYG, T_STRING_SQ_WYSIWYG);
+    public static final TokenSet STRING_LITERALS = TokenSet.create(T_STRING_DQ, T_STRING_SQ, T_STRING_DQ_WYSIWYG, T_STRING_SQ_WYSIWYG);
     
     @NotNull
     @Override

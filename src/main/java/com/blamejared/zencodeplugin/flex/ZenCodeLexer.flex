@@ -173,7 +173,6 @@ T_STRING_SQ_WYSIWYG=@'[^']'
   "true"                      { return K_TRUE; }
   "false"                     { return K_FALSE; }
   "new"                       { return K_NEW; }
-  "K_EXPANSION"               { return K_EXPANSION; }
 
   {T_COMMENT_SCRIPT}          { return T_COMMENT_SCRIPT; }
   {T_COMMENT_SINGLELINE}      { return T_COMMENT_SINGLELINE; }

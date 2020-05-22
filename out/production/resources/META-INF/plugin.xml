@@ -31,15 +31,17 @@
         <completion.contributor
                 language="ZenCode"
                 implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeCompletionContributor"/>
+        <projectConfigurable instance="com.blamejared.zencodeplugin.components.ZenCodeSettingsPanel"/>
+        <annotator language="ZenCode" implementationClass="com.blamejared.zencodeplugin.completion.ZenCodeAnnotator"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
 
     </actions>
-    <project-components>
+    <application-components>
         <component>
             <implementation-class>com.blamejared.zencodeplugin.components.ZenCodeProjectComponent</implementation-class>
         </component>
-    </project-components>
+    </application-components>
 </idea-plugin>

@@ -17,7 +17,7 @@ public final class ZenCodePsiImplUtil {
     //#################################
     //### ZenCodeVariable           ###
     //#################################
-    
+    /*
     @Contract("_, _ -> param1")
     public static PsiElement setName(@NotNull ZenCodeVariableName element, String newName) {
         final ASTNode name = element.getTIdentifier().getNode();
@@ -35,16 +35,17 @@ public final class ZenCodePsiImplUtil {
     }
     
     
+    */
     //#################################
-    //### ZenCodeDeclareVariable    ###
+    //### ZenCodeStatementVariable  ###
     //#################################
     
-    public static String getName(@NotNull ZenCodeDeclareVariableName element) {
+    public static String getName(@NotNull ZenCodeStatementVar element) {
         return element.getTIdentifier().getText();
     }
     
     @Contract("_, _ -> param1")
-    public static PsiElement setName(@NotNull ZenCodeDeclareVariableName element, String newName) {
+    public static PsiElement setName(@NotNull ZenCodeStatementVar element, String newName) {
         final ASTNode name = element.getTIdentifier().getNode();
         final PsiElement identifier = ZenCodeElementFactory.createIdentifier(element.getProject(), newName);
         if(identifier != null) {
@@ -54,7 +55,7 @@ public final class ZenCodePsiImplUtil {
     }
     
     @Nullable
-    public static PsiElement getNameIdentifier(ZenCodeDeclareVariableName element) {
+    public static PsiElement getNameIdentifier(ZenCodeStatementVar element) {
         ASTNode keyNode = element.getNode().findChildByType(ZenCodeTypes.T_IDENTIFIER);
         if(keyNode != null) {
             return keyNode.getPsi();

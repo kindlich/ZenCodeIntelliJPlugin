@@ -1,21 +1,15 @@
 package com.blamejared.zencodeplugin.reference;
 
 import com.blamejared.zencodeplugin.language.Icons;
-import com.blamejared.zencodeplugin.psi.ZenCodeDeclareVariableName;
-import com.blamejared.zencodeplugin.psi.ZenCodeTypes;
-import com.blamejared.zencodeplugin.psi.ZenCodeVariableName;
-import com.blamejared.zencodeplugin.util.ZenCodeUtil;
-import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReferenceBase;
-import com.intellij.util.IncorrectOperationException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.blamejared.zencodeplugin.psi.*;
+import com.blamejared.zencodeplugin.util.*;
+import com.intellij.codeInsight.lookup.*;
+import com.intellij.openapi.util.*;
+import com.intellij.psi.*;
+import com.intellij.util.*;
+import org.jetbrains.annotations.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class VariableNameReference extends PsiReferenceBase<PsiElement> {
     
@@ -23,7 +17,8 @@ public class VariableNameReference extends PsiReferenceBase<PsiElement> {
     
     public VariableNameReference(@NotNull PsiElement element, TextRange rangeInElement) {
         super(element, rangeInElement);
-        this.key = element.getText().substring(rangeInElement.getStartOffset(), rangeInElement.getEndOffset());
+        this.key = element.getText()
+                .substring(rangeInElement.getStartOffset(), rangeInElement.getEndOffset());
     }
     
     @Nullable
@@ -49,11 +44,12 @@ public class VariableNameReference extends PsiReferenceBase<PsiElement> {
     
     @Override
     public PsiElement handleElementRename(@NotNull String newElementName) throws IncorrectOperationException {
-        return ((ZenCodeVariableName) myElement).setName(newElementName);
+        return ((ZenCodeNamedElement) myElement).setName(newElementName);
     }
     
     @Override
     public boolean isReferenceTo(@NotNull PsiElement element) {
-        return element instanceof ZenCodeDeclareVariableName && Objects.equals(((ZenCodeDeclareVariableName) element).getName(), key) && super.isReferenceTo(element);
+        return element instanceof ZenCodeStatementVar && Objects.equals(((ZenCodeNamedElement) element)
+                .getName(), key) && super.isReferenceTo(element);
     }
 }

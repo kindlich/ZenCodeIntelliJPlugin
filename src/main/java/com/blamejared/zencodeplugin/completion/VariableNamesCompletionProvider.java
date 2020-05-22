@@ -13,6 +13,7 @@ public class VariableNamesCompletionProvider extends CompletionProvider<Completi
     
     @Override
     protected void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
+        /*
         final PsiElement prevSibling = parameters.getPosition().getPrevSibling();
         if(prevSibling == null) {
             return;
@@ -22,5 +23,7 @@ public class VariableNamesCompletionProvider extends CompletionProvider<Completi
             result.addElement(LookupElementBuilder.create(allVariableDeclaration).withIcon(Icons.ZENCODE_ICON));
         }
         
+        
+         */
     }
 }

@@ -7,9 +7,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ZenCodeUtil {
@@ -17,10 +15,11 @@ public class ZenCodeUtil {
     private ZenCodeUtil() {
     }
     
-    public static Collection<ZenCodeDeclareVariableName> getAllVariableDeclarations(PsiElement before) {
-        return getElementsDeclaredBefore(before, ZenCodeTypes.DECLARE_VARIABLE_NAME, ZenCodeTypes.STATEMENT_VAR)
+    public static Collection<ZenCodeStatementVar> getAllVariableDeclarations(PsiElement before) {
+        // return Collections.emptyList();
+        return getElementsDeclaredBefore(before, ZenCodeTypes.STATEMENT_VAR)
                 .stream()
-                .map(e -> e instanceof ZenCodeStatementVar ? ((ZenCodeStatementVar) e).getDeclareVariableName() : (ZenCodeDeclareVariableName) e)
+                .map(e -> ((ZenCodeStatementVar) e))
                 .collect(Collectors.toList());
     }
     
